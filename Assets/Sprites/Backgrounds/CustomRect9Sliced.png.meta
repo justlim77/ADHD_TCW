@@ -1,0 +1,110 @@
+fileFormatVersion: 2
+guid: c9640cf4e291e4d42b390ac4b5de840f
+timeCreated: 1453021340
+licenseType: Free
+TextureImporter:
+  fileIDToRecycleName:
+    21300000: Generic-UI-Sliced_0
+  serializedVersion: 2
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 1
+    linearTexture: 0
+    correctGamma: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+  isReadable: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 0
+  cubemapConvolution: 0
+  cubemapConvolutionSteps: 7
+  cubemapConvolutionExponent: 1.5
+  seamlessCubemap: 0
+  textureFormat: -1
+  maxTextureSize: 2048
+  textureSettings:
+    filterMode: -1
+    aniso: 16
+    mipBias: -1
+    wrapMode: 1
+  nPOTScale: 0
+  lightmap: 0
+  rGBM: 0
+  compressionQuality: 50
+  allowsAlphaSplitting: 0
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spriteBorder: {x: 43, y: 43, z: 43, w: 43}
+  spritePixelsToUnits: 100
+  alphaIsTransparency: 1
+  textureType: 8
+  buildTargetSettings: []
+  spriteSheet:
+    sprites:
+    - name: Generic-UI-Sliced_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 512
+        height: 256
+      alignment: 9
+      pivot: {x: 0, y: 0}
+      border: {x: 64, y: 64, z: 64, w: 64}
+      outline:
+      - - {x: 489, y: 12}
+        - {x: 490, y: 12}
+        - {x: 503, y: 25}
+        - {x: 506, y: 31}
+        - {x: 508, y: 34}
+        - {x: 508, y: 36}
+        - {x: 511, y: 41}
+        - {x: 512, y: 47}
+        - {x: 512, y: 209}
+        - {x: 511, y: 215}
+        - {x: 505, y: 228}
+        - {x: 500, y: 233}
+        - {x: 500, y: 234}
+        - {x: 490, y: 244}
+        - {x: 489, y: 244}
+        - {x: 484, y: 249}
+        - {x: 471, y: 255}
+        - {x: 465, y: 256}
+        - {x: 47, y: 256}
+        - {x: 41, y: 255}
+        - {x: 28, y: 249}
+        - {x: 23, y: 244}
+        - {x: 22, y: 244}
+        - {x: 12, y: 234}
+        - {x: 12, y: 233}
+        - {x: 7, y: 228}
+        - {x: 1, y: 215}
+        - {x: 0, y: 209}
+        - {x: 0, y: 47}
+        - {x: 1, y: 41}
+        - {x: 7, y: 28}
+        - {x: 12, y: 23}
+        - {x: 12, y: 22}
+        - {x: 22, y: 12}
+        - {x: 23, y: 12}
+        - {x: 28, y: 7}
+        - {x: 41, y: 1}
+        - {x: 47, y: 0}
+        - {x: 465, y: 0}
+        - {x: 471, y: 1}
+        - {x: 484, y: 7}
+    outline: []
+  spritePackingTag: 
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
