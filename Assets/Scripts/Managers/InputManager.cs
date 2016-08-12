@@ -4,7 +4,7 @@ using UnityEditor;
 
 using UnityEngine;
 
-#if UNITY_5_3
+#if UNITY_5_3_OR_NEWER
 using UnityEngine.SceneManagement;
 #endif
 
@@ -36,7 +36,7 @@ public class InputManager : Singleton<InputManager> {
     public void Restart()
     {
         fade.FadeTo(1.0f);
-#if UNITY_5_3
+#if UNITY_5_3_OR_NEWER
         SceneManager.LoadScene(m_CurrentScene.buildIndex);
 #else
         Application.LoadLevel(Application.loadedLevel);   

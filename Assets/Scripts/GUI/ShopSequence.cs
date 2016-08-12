@@ -5,16 +5,20 @@ public class ShopSequence : MonoBehaviour
 {
     public Vector2 startPos;
 
-    RectTransform m_Rect;
-
-    void Awake()
+    RectTransform _rectTransform = null;
+    RectTransform rectTransform
     {
-        m_Rect = GetComponent<RectTransform>();
+        get
+        {
+            if (_rectTransform == null)
+                _rectTransform = GetComponent<RectTransform>();
+            return _rectTransform;
+        }
     }
 
     void Start()
     {
-        m_Rect.anchoredPosition = startPos;
+        rectTransform.anchoredPosition = startPos;
     }
 
     public void OpenShop()
