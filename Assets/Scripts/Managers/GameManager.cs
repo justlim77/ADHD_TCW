@@ -4,6 +4,9 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
+    public delegate void GameStateChangedEventHandler(object sender, GameState e);
+    public static event GameStateChangedEventHandler OnGameStateChanged;
+        
     //Is Action Done?
     public static bool isCleanShelfDone = false;
     public static bool isBagDone = false;
@@ -41,6 +44,23 @@ public class GameManager : MonoBehaviour
     static Slider sliMessiness_;
     static Slider sliTiredness_;
     static SettingSequence gameOver_;
+
+    GameState _gameState;
+    GameState gameState
+    {
+        get
+        {
+            return _gameState;
+        }
+        set
+        {
+            if (_gameState != value)
+            {
+                _gameState = value;
+                GameStateChanged();
+            }
+        }
+    }
 
     void OnDestroy()
     {
@@ -167,4 +187,23 @@ public class GameManager : MonoBehaviour
 
         return score;
     }
+
+    protected void GameStateChanged()
+    {
+        if (OnGameStateChanged != null)
+            OnGameStateChanged(this, gameState);
+    }
+
+    public void PlayGame()
+    {
+        gameState = GameState.Playing;
+    }
+}
+
+public enum GameState
+{
+    Pregame,
+    Playing,
+    End,
+    Postgame
 }

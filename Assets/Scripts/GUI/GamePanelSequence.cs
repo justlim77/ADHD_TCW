@@ -9,10 +9,8 @@ public class GamePanelSequence : MonoBehaviour
     public BoxCollider2D gotoShelf;
     public BoxCollider2D gotoSleep;
     public BoxCollider2D gotoBag;
-    public TimerSlide timerIcon;
-    public BarSlide negativityBar;
-    public BarSlide tirednessBar;
-    public BarSlide messinessBar;
+    public AnimatedSlide timer;
+    public AnimatedSlide statsBar;
     public float slideDelay = 0.1f;
 
     public GameObject currencyPanel;
@@ -37,6 +35,26 @@ public class GamePanelSequence : MonoBehaviour
     TextSequence m_gameSequence;
     CurrencySequence m_CurrencySequence;
     WaitForSeconds m_WaitSlideDelay;
+
+    void OnEnable()
+    {
+        GameManager.OnGameStateChanged += GameManager_OnGameStateChanged;
+    }
+
+    void OnDisable()
+    {
+        GameManager.OnGameStateChanged -= GameManager_OnGameStateChanged;
+    }
+
+    private void GameManager_OnGameStateChanged(object sender, GameState e)
+    {
+        switch (e)
+        {
+            case GameState.Playing:
+                StartSequence();
+                break;
+        }
+    }
 
     void Awake ()
     {
@@ -70,10 +88,8 @@ public class GamePanelSequence : MonoBehaviour
         textPanel.gameObject.SetActive(false);
         gameClearPanel.gameObject.SetActive(false);
 
-        timerIcon.Initialize();
-        negativityBar.Initialize();
-        messinessBar.Initialize();
-        tirednessBar.Initialize();
+        timer.Initialize();
+        statsBar.Initialize();
     }
 
     public void Initialize()
@@ -115,7 +131,7 @@ public class GamePanelSequence : MonoBehaviour
     {
         //Initialize
         for (int i = 0; i < headerText.Length; i++)
-            headerText[i].GetComponent<BarSlide>().Initialize();
+            headerText[i].GetComponent<AnimatedSlide>().Initialize();
 
         //Fade in White Canvas
         gameClearPanel.gameObject.SetActive(true);
@@ -126,7 +142,7 @@ public class GamePanelSequence : MonoBehaviour
         //Calculate Results Overall
         headerText[3].text = "Overall Results:";
 
-        headerText[3].GetComponent<BarSlide>().SlideInBar();
+        headerText[3].GetComponent<AnimatedSlide>().SlideIn();
         yield return new WaitForSeconds(0.7f);
 
         if (GameManager.CalculateScore(0) <= 14) //Bad
@@ -148,7 +164,7 @@ public class GamePanelSequence : MonoBehaviour
             yield return resultText[3].RunTypeText("Hooray! You hit jackpot! You are on your way to being a cool cucumber! Be proud of yourself!");
         }
 
-        headerText[0].GetComponent<BarSlide>().SlideInBar();
+        headerText[0].GetComponent<AnimatedSlide>().SlideIn();
         yield return new WaitForSeconds(0.7f);
 
         //Calculate Results E1
@@ -171,7 +187,7 @@ public class GamePanelSequence : MonoBehaviour
             yield return resultText[0].RunTypeText("You nailed these:\n\n-> Being firm and not harsh\n-> Acknowledging your child's needs");
         }
 
-        headerText[1].GetComponent<BarSlide>().SlideInBar();
+        headerText[1].GetComponent<AnimatedSlide>().SlideIn();
         yield return new WaitForSeconds(0.7f);
 
         //Calculate Results E2
@@ -194,7 +210,7 @@ public class GamePanelSequence : MonoBehaviour
             yield return resultText[1].RunTypeText("You nailed these:\n\n-> Getting your child's attention first\n-> Stating tasks requirements\n-> Checking for understanding");
         }
 
-        headerText[2].GetComponent<BarSlide>().SlideInBar();
+        headerText[2].GetComponent<AnimatedSlide>().SlideIn();
         yield return new WaitForSeconds(0.7f);
 
         //Calculate Results E3
@@ -223,6 +239,7 @@ public class GamePanelSequence : MonoBehaviour
 
     IEnumerator RunStartSequence()
     {
+        
         // Show day number and time arrived at home
         textPanel.gameObject.SetActive(true);
 
@@ -265,13 +282,9 @@ public class GamePanelSequence : MonoBehaviour
         messageText.Clear();
 
         yield return m_WaitSlideDelay;
-        timerIcon.SlideIn();
+        timer.SlideIn();
         yield return m_WaitSlideDelay;
-        negativityBar.SlideInBar();
-        yield return m_WaitSlideDelay;
-        messinessBar.SlideInBar();
-        yield return m_WaitSlideDelay;
-        tirednessBar.SlideInBar();
+        statsBar.SlideIn();
         yield return m_WaitSlideDelay;
 
         gotoSleep.enabled = true;
