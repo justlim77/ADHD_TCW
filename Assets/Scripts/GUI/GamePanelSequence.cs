@@ -77,19 +77,16 @@ public class GamePanelSequence : MonoBehaviour
         gotoShelf.GetComponent<ShakingAnimation>().StopAnimation();
         gotoBag.GetComponent<ShakingAnimation>().StopAnimation();
 
-        foreach (GameObject go in gameplayElements)
-        {
-            go.SetActive(false);
-        }
+        //foreach (GameObject go in gameplayElements)
+        //{
+        //    go.SetActive(false);
+        //}
 
         m_WaitSlideDelay = new WaitForSeconds(slideDelay);
 
         m_TextPanelRect.anchoredPosition = Vector2.zero;
         textPanel.gameObject.SetActive(false);
         gameClearPanel.gameObject.SetActive(false);
-
-        timer.Initialize();
-        statsBar.Initialize();
     }
 
     public void Initialize()
@@ -130,8 +127,8 @@ public class GamePanelSequence : MonoBehaviour
     IEnumerator RunEndSequence()
     {
         //Initialize
-        for (int i = 0; i < headerText.Length; i++)
-            headerText[i].GetComponent<AnimatedSlide>().Initialize();
+        //for (int i = 0; i < headerText.Length; i++)
+        //    headerText[i].GetComponent<AnimatedSlide>().Initialize();
 
         //Fade in White Canvas
         gameClearPanel.gameObject.SetActive(true);
@@ -280,12 +277,6 @@ public class GamePanelSequence : MonoBehaviour
         textPanel.gameObject.SetActive(false);
         dayText.Clear();
         messageText.Clear();
-
-        yield return m_WaitSlideDelay;
-        timer.SlideIn();
-        yield return m_WaitSlideDelay;
-        statsBar.SlideIn();
-        yield return m_WaitSlideDelay;
 
         gotoSleep.enabled = true;
         gotoShelf.enabled = true;

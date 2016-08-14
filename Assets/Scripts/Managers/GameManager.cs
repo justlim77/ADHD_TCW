@@ -2,7 +2,7 @@
 using System.Collections;
 using UnityEngine.UI;
 
-public class GameManager : MonoBehaviour
+public class GameManager : Singleton<GameManager>
 {
     public delegate void GameStateChangedEventHandler(object sender, GameState e);
     public static event GameStateChangedEventHandler OnGameStateChanged;
@@ -45,7 +45,7 @@ public class GameManager : MonoBehaviour
     static Slider sliTiredness_;
     static SettingSequence gameOver_;
 
-    GameState _gameState;
+    GameState _gameState = GameState.Default;
     GameState gameState
     {
         get
@@ -60,6 +60,16 @@ public class GameManager : MonoBehaviour
                 GameStateChanged();
             }
         }
+    }
+
+    void OnEnable()
+    {
+        CameraControl.OnCameraReached += CameraControl_OnCameraReached;
+    }
+
+    private void CameraControl_OnCameraReached(object sender)
+    {
+        gameState = GameState.Pregame;
     }
 
     void OnDestroy()
@@ -123,6 +133,17 @@ public class GameManager : MonoBehaviour
         sliMessiness_ = sliMessiness;
         sliTiredness_ = sliTiredness;
         gameOver_ = gameOver;
+    }
+
+    void Start()
+    {
+        Initialize();
+    }
+
+    bool Initialize()
+    {
+        gameState = GameState.Default;
+        return true;
     }
 
     void ResetActionCheck()
@@ -202,6 +223,7 @@ public class GameManager : MonoBehaviour
 
 public enum GameState
 {
+    Default,
     Pregame,
     Playing,
     End,

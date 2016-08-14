@@ -10,13 +10,24 @@ public class Clock : MonoBehaviour
 
     //Force Go Sleep
     public BoxCollider2D bcShelf;
-    public CurrencySequence currencyPanel;
-    public MoveUpDown statsPanel;
     public SettingSequence sleepPanel;
-    public ShopSequence shopPanel;
     public GamePanelSequence gamePanel;
     public GameManager gameManager;
     public ShelfCleaning shelfClean;
+
+    void OnEnable()
+    {
+        GameManager.OnGameStateChanged += GameManager_OnGameStateChanged;
+    }
+
+    private void GameManager_OnGameStateChanged(object sender, GameState e)
+    {
+        //switch (e)
+        //{
+        //    case GameState.Playing:
+                
+        //}
+    }
 
     public void ResetClockCount()
     {
@@ -48,12 +59,9 @@ public class Clock : MonoBehaviour
             {
                 GameManager.hasDayStarted = false;
                 sleepPanel.CloseSettings(false);
-                currencyPanel.EnterScene();
-                shopPanel.CloseShop();
                 shelfClean.DeInitialize();
                 gamePanel.ResetForNextScene();
                 gameManager.IncreaseDayScene();
-                statsPanel.ResetPos();
                 gamePanel.StartSequence();
                 gameManager.SetInteractableWithoutScript(true);
                 ResetClockCount();

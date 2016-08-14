@@ -51,7 +51,7 @@ public class StartSequence : MonoBehaviour
 
         // Set game panel active
         gamePanel.SetActive(true);
-        gamePanel.GetComponent<GamePanelSequence>().Initialize();
+        //gamePanel.GetComponent<GamePanelSequence>().Initialize();
        
         yield return null;
     }

@@ -3,7 +3,7 @@ using System.Collections;
 using UnityEngine.UI;
 using System;
 
-public class GameTimer : MonoBehaviour
+public class GameTimer : Singleton<GameTimer>
 {
     DateTime epochStart;
 

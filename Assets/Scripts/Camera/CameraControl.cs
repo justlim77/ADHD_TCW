@@ -4,6 +4,9 @@ using System.Collections.Generic;
 
 public class CameraControl : MonoBehaviour {
 
+    public delegate void CameraReachedEventHandler(object sender);
+    public static event CameraReachedEventHandler OnCameraReached;
+
     public float cameraDepth = -10.0f;
     public Vector3 OriginalPos;
     public Vector3 StartPos = new Vector3(0.0f, 6.4f, -10f);
@@ -26,6 +29,13 @@ public class CameraControl : MonoBehaviour {
     ZoomType m_ZoomType;
     float m_OriginalOrthoSize;
     float m_ZoomedOrthoSize;
+
+    protected void CameraReached()
+    {
+        Debug.Log("Camera reached destination.");
+        if (OnCameraReached != null)
+            OnCameraReached(this);
+    }
 
     void Awake () {
         OriginalPos = Camera.main.transform.position;
@@ -69,7 +79,13 @@ public class CameraControl : MonoBehaviour {
 
     IEnumerator RunCamToPlayArea()
     {
-        iTween.MoveTo(gameObject, iTween.Hash("y", PlayPos.y, "time", timeToReach, "easetype", iTween.EaseType.easeOutQuart));
+        iTween.MoveTo(gameObject, 
+            iTween.Hash(
+            "y", PlayPos.y, 
+            "time", timeToReach,
+            "easetype", iTween.EaseType.easeOutQuart,
+            "oncomplete", "CameraReached"
+            ));
 
         yield return null;
     }
