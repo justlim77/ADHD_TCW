@@ -20,6 +20,10 @@ public class Clock : MonoBehaviour
         GameManager.OnGameStateChanged += GameManager_OnGameStateChanged;
     }
 
+    void OnDisable()
+    {
+        GameManager.OnGameStateChanged -= GameManager_OnGameStateChanged;
+    }
     private void GameManager_OnGameStateChanged(object sender, GameState e)
     {
         //switch (e)
@@ -62,7 +66,7 @@ public class Clock : MonoBehaviour
                 shelfClean.DeInitialize();
                 gamePanel.ResetForNextScene();
                 gameManager.IncreaseDayScene();
-                gamePanel.StartSequence();
+                //gamePanel.StartSequence();
                 gameManager.SetInteractableWithoutScript(true);
                 ResetClockCount();
             }

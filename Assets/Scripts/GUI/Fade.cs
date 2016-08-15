@@ -2,20 +2,19 @@
 using UnityEngine.UI;
 using System.Collections;
 
-public class Fade : MonoBehaviour {
-
-    public float fadeDuration = 1.0f;
-
+public class Fade : MonoBehaviour
+{
     float m_CurrentAlpha;
     Image m_Image;
     float m_TargetAlpha;
 
-    void Awake() {
+    void Awake()
+    {
         m_Image = this.GetComponent<Image>();
         m_CurrentAlpha = m_Image.color.a;
     }
 
-    public IEnumerator FadeTo(float direction)
+    public IEnumerator FadeTo(float direction, float fadeDuration)
     {
         m_Image.raycastTarget = true;
         m_TargetAlpha = direction;
@@ -47,7 +46,7 @@ public class Fade : MonoBehaviour {
         m_Image.color = color;
     }
 
-    public void CrossFadeAlpha(FadeType fadeType)
+    public void CrossFadeAlpha(FadeType fadeType, float fadeDuration)
     {
         switch (fadeType)
         {

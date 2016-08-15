@@ -42,7 +42,7 @@ public class StartSequence : MonoBehaviour
     IEnumerator RunStartScene()
     {
         // Fade in scene
-        yield return StartCoroutine(fadePanel.GetComponent<Fade>().FadeTo(0));
+        yield return StartCoroutine(fadePanel.GetComponent<Fade>().FadeTo(0, 1));
 
         // Move camera to play area
         iTween.MoveTo(gameObject, iTween.Hash("y", Screen.height * 1.5, "time", camSpeed));

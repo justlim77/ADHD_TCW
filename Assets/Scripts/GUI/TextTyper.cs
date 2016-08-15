@@ -12,6 +12,7 @@ public class TextTyper : MonoBehaviour
 
     private Text m_Text;
     private WaitForSeconds m_LetterPause;
+    bool _skip = false;
 
     void Awake()
     {
@@ -25,13 +26,33 @@ public class TextTyper : MonoBehaviour
         m_Text.text = string.Empty;
     }
 
-    public IEnumerator RunTypeText(string _message)
+    public bool Initialize()
+    {
+        bool result = true;
+
+        if (m_Text == null)
+        {
+            m_Text = GetComponent<Text>();
+            if (m_Text == null)
+            {
+                result = false;
+                Debug.Log("Failed to initialize TextTyper!");
+            }
+        }
+
+        m_LetterPause = new WaitForSeconds(letterPause);
+
+        return result;
+    }
+
+    public IEnumerator RunTypeText(string msg)
     {
         Clear();
 
         // Initialize
-        message = _message;
-        char[] messageArray = message.ToCharArray();
+        message = msg;
+        char[] messageArray = new char[0];
+        messageArray = message.ToCharArray();
 
         // Type staggered chars
         foreach (char letter in messageArray)
@@ -39,15 +60,29 @@ public class TextTyper : MonoBehaviour
             m_Text.text += letter;
             if (typeSound1 && typeSound2)
                 AudioManager.Instance.RandomizeSFX(typeSound1, typeSound2);
-            yield return 0;
-            yield return m_LetterPause;
+            if (_skip)
+            {
+                Skip();
+                yield break;
+            }
+            else
+                yield return m_LetterPause;
+            //yield return 0;
+            //yield return m_LetterPause;
         }
     }
 
     public void Clear()
     {
-        m_Text.text = string.Empty;
+        if (m_Text != null)
+            m_Text.text = string.Empty;
         message = string.Empty;
+        _skip = false;
+    }
+
+    public void Skip()
+    {
+        m_Text.text = message;
     }
 
     public void FadeText()

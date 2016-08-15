@@ -22,9 +22,9 @@ public class LogoSequence : MonoBehaviour
 
     IEnumerator RunLogoSequence()
     {
-        yield return fade.FadeTo(0);
+        yield return fade.FadeTo(0, 1);
         yield return new WaitForSeconds(logoShowDuration);
-        yield return fade.FadeTo(1);
+        yield return fade.FadeTo(1, 1);
 
 #if UNITY_5_3_OR_NEWER
         SceneManager.LoadScene(m_CurrentScene.buildIndex + 1);

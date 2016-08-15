@@ -12,6 +12,7 @@ public class UserInterface : MonoBehaviour
     public GameObject bottomBar;
 
     public GameObject notificationPrefab;
+    public GameObject arrivalPrefab;
 
     public GameObject[] gameplayElements;
 
@@ -132,10 +133,10 @@ public class UserInterface : MonoBehaviour
     IEnumerator RunStartSequence()
     {
         // Show day number and time arrived at home
-        textPanel.gameObject.SetActive(true);
-
-        yield return m_TextSequence.RunFadeCanvas(1.0f);
-        yield return new WaitForSeconds(m_TextSequence.fadeDuration);
+        var arrival = Instantiate(arrivalPrefab);
+        arrival.transform.SetParent(this.transform);
+        TextSequence sequence = arrival.GetComponent<TextSequence>();
+        yield return StartCoroutine(sequence.RunFadeCanvas(1.0f, 1.0f));
 
         // Set gameplay elements active
         foreach (GameObject go in gameplayElements)
@@ -147,30 +148,27 @@ public class UserInterface : MonoBehaviour
         {
             case 1:
                 GameManager.gameHour = 5;
-                yield return dayText.RunTypeText("Day 1");
-                yield return messageText.RunTypeText("You arrived home from work at 5:00 P.M.");
+                yield return sequence.dayTextTyper.RunTypeText("Day 1");
+                yield return sequence.messageTextTyper.RunTypeText("You arrived home from work at 5:00 P.M.");
                 break;
             case 2:
                 GameManager.gameHour = 6;
-                yield return dayText.RunTypeText("Day 2");
-                yield return messageText.RunTypeText("You arrived home from work at 6:00 P.M. due to bad traffic.");
+                yield return sequence.dayTextTyper.RunTypeText("Day 2");
+                yield return sequence.messageTextTyper.RunTypeText("You arrived home from work at 6:00 P.M. due to bad traffic.");
                 break;
             case 3:
                 GameManager.gameHour = 7;
-                yield return dayText.RunTypeText("Day 3");
-                yield return messageText.RunTypeText("You arrived home from work at 7:00 P.M. as you had to overtime at work.");
+                yield return sequence.dayTextTyper.RunTypeText("Day 3");
+                yield return sequence.messageTextTyper.RunTypeText("You arrived home from work at 7:00 P.M. as you had to overtime at work.");
                 break;
         }
 
         yield return new WaitForSeconds(2.0f);
 
         // Fade out text panel canvas group alpha
-        yield return m_TextSequence.RunFadeCanvas(0.0f);
-        yield return new WaitForSeconds(m_TextSequence.fadeDuration);
+        yield return StartCoroutine(sequence.RunFadeCanvas(0.0f, 0.5f));
 
-        textPanel.gameObject.SetActive(false);
-        dayText.Clear();
-        messageText.Clear();
+        Destroy(arrival);
 
         gotoSleep.enabled = true;
         gotoShelf.enabled = true;
@@ -192,8 +190,8 @@ public class UserInterface : MonoBehaviour
         //Fade in White Canvas
         gameClearPanel.gameObject.SetActive(true);
 
-        yield return m_gameSequence.RunFadeCanvas(1.0f);
-        yield return new WaitForSeconds(m_gameSequence.fadeDuration);
+        yield return m_gameSequence.RunFadeCanvas(1.0f, 1.0f);
+        //yield return new WaitForSeconds(m_gameSequence.fadeDuration);
 
         //Calculate Results Overall
         headerText[3].text = "Overall Results:";

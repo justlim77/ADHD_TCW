@@ -1,28 +1,32 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
-public class TextSequence : MonoBehaviour {
+public class TextSequence : MonoBehaviour
+{
+    public TextTyper dayTextTyper;
+    public TextTyper messageTextTyper;
 
-    public float fadeDuration = 1.0f;
-
-    CanvasGroup m_CanvasGroup;
+    Image _image;
+    Image image
+    {
+        get
+        {
+            if (_image == null)
+                _image = GetComponent<Image>();
+            return _image;
+        }
+    }
 
     void OnEnable()
     {
-        m_CanvasGroup.alpha = 0.0f;
+        image.canvasRenderer.SetAlpha(0.0f);
     }
 
-    void Awake()
-    {
-        m_CanvasGroup = this.GetComponent<CanvasGroup>();
-    }
-
-    void Start() { }
-
-    public IEnumerator RunFadeCanvas(float targetAlpha)
+    public IEnumerator RunFadeCanvas(float targetAlpha, float fadeDuration)
     {
         iTween.ValueTo(gameObject, iTween.Hash(
-            "from", m_CanvasGroup.alpha,
+            "from", image.canvasRenderer.GetAlpha(),
             "to", targetAlpha,
             "time", fadeDuration,
             "onupdatetarget", gameObject,
@@ -35,6 +39,6 @@ public class TextSequence : MonoBehaviour {
 
     void FadeCanvasOnUpdateCallback(float value)
     {
-        m_CanvasGroup.alpha = value;
+        image.canvasRenderer.SetAlpha(value);
     }
 }
