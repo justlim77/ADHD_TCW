@@ -11,8 +11,10 @@ public class CameraControl : MonoBehaviour {
     public Vector3 OriginalPos;
     public Vector3 StartPos = new Vector3(0.0f, 6.4f, -10f);
     public Vector3 PlayPos = new Vector3(0.0f, 0.0f, -10f);
+    public bool animate = true;
     public float timeToReach = 2.0f; 
     public float CamSpeed = 5.0f;
+    public iTween.EaseType easeType = iTween.EaseType.easeOutQuart;
     public enum ZoomType { In, Out };
     public float zoomInterval = 1.0f;
 
@@ -29,6 +31,33 @@ public class CameraControl : MonoBehaviour {
     ZoomType m_ZoomType;
     float m_OriginalOrthoSize;
     float m_ZoomedOrthoSize;
+
+    void OnEnable()
+    {
+        GameManager.OnGameStateChanged += GameManager_OnGameStateChanged;
+    }
+
+    void OnDisable()
+    {
+        GameManager.OnGameStateChanged -= GameManager_OnGameStateChanged;
+    }
+
+    private void GameManager_OnGameStateChanged(object sender, GameState e)
+    {
+        switch (e)
+        {
+            case GameState.Default:
+                Initialize();
+                StartCoroutine(RunCamToPlayArea());
+                break;
+        }
+    }
+
+    bool Initialize()
+    {
+        Camera.main.transform.position = StartPos;
+        return true;
+    }
 
     protected void CameraReached()
     {
@@ -78,14 +107,24 @@ public class CameraControl : MonoBehaviour {
     }
 
     IEnumerator RunCamToPlayArea()
-    {
-        iTween.MoveTo(gameObject, 
-            iTween.Hash(
-            "y", PlayPos.y, 
-            "time", timeToReach,
-            "easetype", iTween.EaseType.easeOutQuart,
-            "oncomplete", "CameraReached"
-            ));
+    {        
+        yield return StartCoroutine(Transition.Fade(FadeType.ToClear, 1.0f));
+
+        if (animate)
+        {
+            iTween.MoveTo(gameObject,
+                iTween.Hash(
+                "y", PlayPos.y,
+                "time", timeToReach,
+                "easetype", easeType,
+                "oncomplete", "CameraReached"
+                ));
+        }
+        else
+        {
+            transform.position = PlayPos;
+            CameraReached();
+        }
 
         yield return null;
     }

@@ -2,6 +2,10 @@
 using System.Collections;
 using UnityEngine.UI;
 
+#if UNITY_5_3_OR_NEWER
+using UnityEngine.SceneManagement;
+#endif
+
 public class GameManager : Singleton<GameManager>
 {
     public delegate void GameStateChangedEventHandler(object sender, GameState e);
@@ -45,7 +49,7 @@ public class GameManager : Singleton<GameManager>
     static Slider sliTiredness_;
     static SettingSequence gameOver_;
 
-    GameState _gameState = GameState.Default;
+    GameState _gameState = GameState.None;
     GameState gameState
     {
         get
@@ -57,6 +61,7 @@ public class GameManager : Singleton<GameManager>
             if (_gameState != value)
             {
                 _gameState = value;
+                Debug.Log("GameState changed to " + _gameState.ToString());
                 GameStateChanged();
             }
         }
@@ -65,6 +70,18 @@ public class GameManager : Singleton<GameManager>
     void OnEnable()
     {
         CameraControl.OnCameraReached += CameraControl_OnCameraReached;
+        SceneManager.sceneLoaded += SceneManager_sceneLoaded;
+    }
+
+    private void SceneManager_sceneLoaded(UnityEngine.SceneManagement.Scene arg0, UnityEngine.SceneManagement.LoadSceneMode arg1)
+    {
+        Initialize();
+    }
+
+    void OnDisable()
+    {
+        CameraControl.OnCameraReached -= CameraControl_OnCameraReached;
+        SceneManager.sceneLoaded -= SceneManager_sceneLoaded;
     }
 
     private void CameraControl_OnCameraReached(object sender)
@@ -74,14 +91,16 @@ public class GameManager : Singleton<GameManager>
 
     void OnDestroy()
     {
+        base.OnDestroy();
+
         ResetActionCheck();
         ResetDay();
         isTempPause = false;
         isInScenario = false;
         dayScene = 1;
 
-        lvlPositivity = 2;
-        lvlCleanliness = 2;
+        lvlPositivity = 5;
+        lvlCleanliness = 5;
         lvlStamina = 5;
 
         for (int i = 0; i < gameReward.Length; i++)
@@ -137,7 +156,7 @@ public class GameManager : Singleton<GameManager>
 
     void Start()
     {
-        Initialize();
+
     }
 
     bool Initialize()
@@ -223,6 +242,7 @@ public class GameManager : Singleton<GameManager>
 
 public enum GameState
 {
+    None,
     Default,
     Pregame,
     Playing,

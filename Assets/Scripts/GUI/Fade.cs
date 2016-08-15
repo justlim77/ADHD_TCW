@@ -15,9 +15,6 @@ public class Fade : MonoBehaviour {
         m_CurrentAlpha = m_Image.color.a;
     }
 
-    void Start() {
-    }
-
     public IEnumerator FadeTo(float direction)
     {
         m_Image.raycastTarget = true;
@@ -39,7 +36,7 @@ public class Fade : MonoBehaviour {
     public void AlphaOnUpdateCallback(float value)
     {
         m_CurrentAlpha = value;
-        m_Image.color = new Color(1f, 1f, 1f, m_CurrentAlpha);
+        m_Image.canvasRenderer.SetAlpha(m_CurrentAlpha);
 
         if (m_CurrentAlpha == m_TargetAlpha)
             m_Image.raycastTarget = false;
@@ -49,4 +46,29 @@ public class Fade : MonoBehaviour {
     {
         m_Image.color = color;
     }
+
+    public void CrossFadeAlpha(FadeType fadeType)
+    {
+        switch (fadeType)
+        {
+            case FadeType.ToWhite:
+                //m_Image.CrossFadeAlpha(1.0f, fadeDuration, true);
+                iTween.ValueTo(gameObject, iTween.Hash(
+                    "from", m_Image.color.a,
+                    "to", 1.0f,
+                    "time", fadeDuration,
+                    "onupdatetarget", gameObject,
+                    "onupdate", "AlphaOnUpdateCallback",
+                    "easetype", iTween.EaseType.linear
+                    )
+                );
+                break;
+        }
+    }
+}
+
+public enum FadeType
+{
+    ToWhite,
+    ToClear
 }

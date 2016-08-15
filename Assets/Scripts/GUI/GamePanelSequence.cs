@@ -51,7 +51,7 @@ public class GamePanelSequence : MonoBehaviour
         switch (e)
         {
             case GameState.Playing:
-                StartSequence();
+                //StartSequence();
                 break;
         }
     }
@@ -68,7 +68,7 @@ public class GamePanelSequence : MonoBehaviour
 	void Start ()
     {
         ResetForNextScene();
-        gameObject.SetActive(false);
+        //gameObject.SetActive(false);
     }
 
     public void ResetForNextScene()
@@ -235,8 +235,7 @@ public class GamePanelSequence : MonoBehaviour
     }
 
     IEnumerator RunStartSequence()
-    {
-        
+    {        
         // Show day number and time arrived at home
         textPanel.gameObject.SetActive(true);
 
