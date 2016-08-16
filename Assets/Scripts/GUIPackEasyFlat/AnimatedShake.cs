@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class ShakingAnimation : MonoBehaviour
+public class AnimatedShake : MonoBehaviour
 {
     public float speed = 5;
     public bool useSmall = false;

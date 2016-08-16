@@ -71,6 +71,12 @@ public class GameManager : Singleton<GameManager>
     {
         CameraControl.OnCameraReached += CameraControl_OnCameraReached;
         SceneManager.sceneLoaded += SceneManager_sceneLoaded;
+        ShelfCleaning.OnCleaningGameCompleted += ShelfCleaning_OnCleaningGameCompleted;
+    }
+
+    private void ShelfCleaning_OnCleaningGameCompleted(string obj)
+    {
+        Camera.main.GetComponent<CameraControl>().AllowPan(true);
     }
 
     private void SceneManager_sceneLoaded(UnityEngine.SceneManagement.Scene arg0, UnityEngine.SceneManagement.LoadSceneMode arg1)
@@ -82,6 +88,7 @@ public class GameManager : Singleton<GameManager>
     {
         CameraControl.OnCameraReached -= CameraControl_OnCameraReached;
         SceneManager.sceneLoaded -= SceneManager_sceneLoaded;
+        ShelfCleaning.OnCleaningGameCompleted -= ShelfCleaning_OnCleaningGameCompleted;
     }
 
     private void CameraControl_OnCameraReached(object sender)
@@ -194,8 +201,8 @@ public class GameManager : Singleton<GameManager>
 
     public static void SetInteractable(bool isInteractable)
     {
-        btnPause_.interactable = isInteractable;
-        btnSettings_.interactable = isInteractable;
+        //btnPause_.interactable = isInteractable;
+        //btnSettings_.interactable = isInteractable;
     }
 
     public void SetInteractableWithoutScript(bool isInteractable)
@@ -246,6 +253,7 @@ public enum GameState
     Default,
     Pregame,
     Playing,
+    Minigame,
     End,
     Postgame
 }

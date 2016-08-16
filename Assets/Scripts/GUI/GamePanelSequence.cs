@@ -53,9 +53,9 @@ public class GamePanelSequence : MonoBehaviour
 
     public void ResetForNextScene()
     {
-        gotoSleep.GetComponent<ShakingAnimation>().StopAnimation();
-        gotoShelf.GetComponent<ShakingAnimation>().StopAnimation();
-        gotoBag.GetComponent<ShakingAnimation>().StopAnimation();
+        gotoSleep.GetComponent<AnimatedShake>().StopAnimation();
+        gotoShelf.GetComponent<AnimatedShake>().StopAnimation();
+        gotoBag.GetComponent<AnimatedShake>().StopAnimation();
 
         //foreach (GameObject go in gameplayElements)
         //{

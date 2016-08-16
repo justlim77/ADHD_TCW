@@ -1,28 +1,84 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 public class ShelfCleaning : MonoBehaviour
 {
+    public static event Action<string> OnCleaningGameOpen;
+    public static event Action<string> OnCleaningGameCompleted;
+
     public SpriteRenderer bgShelf, goShelf;
-    public BoxCollider2D bcShelf;
+    public GameObject cleaningGamePrefab;
+
+    BoxCollider2D m_boxCollider;
+    BoxCollider2D boxCollider
+    {
+        get
+        {
+            if (m_boxCollider == null)
+            {
+                m_boxCollider = GetComponent<BoxCollider2D>();
+                
+            }
+            return m_boxCollider;
+        }
+    }
+        
     public float slideDelay = 0.1f;
 
-    Color originalBG;
     WaitForSeconds m_WaitSlideDelay;
 
     void Start()
     {
-        originalBG = bgShelf.color;
         m_WaitSlideDelay = new WaitForSeconds(slideDelay);
+    }
+
+    protected void CleaningGameOpened()
+    {
+        if (OnCleaningGameOpen != null)
+        {
+            OnCleaningGameOpen("Shelf Cleaning game opened");
+        }
+    }
+    protected void CleaningGameCompleted()
+    {
+        if (OnCleaningGameCompleted != null)
+        {
+            OnCleaningGameCompleted("Shelf Cleaning game completed");
+        }
+    }
+
+
+    void OnEnable()
+    {
+        GameManager.OnGameStateChanged += GameManager_OnGameStateChanged;
+    }
+
+    void OnDisable()
+    {
+        GameManager.OnGameStateChanged -= GameManager_OnGameStateChanged;
+    }
+
+    private void GameManager_OnGameStateChanged(object sender, GameState e)
+    {
+        switch (e)
+        {
+            case GameState.Playing:
+                Initialize();
+                break;
+        }
     }
 
     public void Initialize()
     {
-        if (!GameManager.isTempPause)
-        {
-            StartCoroutine(ShowShelf());
-            GameManager.isTempPause = true;
-        }
+        //if (!GameManager.isTempPause)
+        //{
+        //    StartCoroutine(ShowShelf());
+        //    GameManager.isTempPause = true;
+        //}
+
+        boxCollider.enabled = true;
+
     }
 
     public void DeInitialize()
@@ -30,31 +86,9 @@ public class ShelfCleaning : MonoBehaviour
         StartCoroutine(HideSelf());
     }
 
-    IEnumerator ShowShelf()
-    {
-        bgShelf.gameObject.SetActive(true);
-        goShelf.gameObject.SetActive(true);
-
-        yield return m_WaitSlideDelay;
-
-        for (float i = 0; i < 1; i += Time.deltaTime)
-        {
-            bgShelf.color = new Color(originalBG.r, originalBG.g, originalBG.b, i);
-            goShelf.color = new Color(1, 1, 1, i);
-            yield return null;
-        }
-    }
-
     IEnumerator HideSelf()
     {
         yield return m_WaitSlideDelay;
-
-        for (float i = 1; i > 0; i -= Time.deltaTime)
-        {
-            bgShelf.color = new Color(originalBG.r, originalBG.g, originalBG.b, i);
-            goShelf.color = new Color(1, 1, 1, i);
-            yield return null;
-        }
 
         bgShelf.gameObject.SetActive(false);
         goShelf.gameObject.SetActive(false);
@@ -62,12 +96,24 @@ public class ShelfCleaning : MonoBehaviour
 
     public void SetBoxCollider(bool isActive)
     {
-        bcShelf.enabled = isActive;
+        boxCollider.enabled = isActive;
     }
 
     public void RestoreBoxCollider()
     {
         if(!GameManager.isCleanShelfDone)
-            bcShelf.enabled = true;
+            boxCollider.enabled = true;
+    }
+
+    public void OpenGame()
+    {
+        GameObject cleaningGame = Instantiate(cleaningGamePrefab);
+        CleaningGame.OnDustCleared += CleaningGame_OnDustCleared;
+        CleaningGameOpened();
+    }
+
+    private void CleaningGame_OnDustCleared(string obj)
+    {
+        CleaningGameCompleted();
     }
 }

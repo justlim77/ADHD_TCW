@@ -40,7 +40,7 @@ public class TextSequence : MonoBehaviour
         }       
     }
 
-    public void FlashClose(bool value = true)
+    public void FlashTapToClose(bool value = true)
     {
         if (value)
         {

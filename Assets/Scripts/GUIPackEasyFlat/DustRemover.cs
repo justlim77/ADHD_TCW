@@ -11,7 +11,7 @@ public class DustRemover : MonoBehaviour
     void OnMouseEnter ()
     {
         Destroy(gameObject);
-        DustInitialize.DirtNumber();
+        CleaningGame.DirtNumber();
     }
 
     void Start ()

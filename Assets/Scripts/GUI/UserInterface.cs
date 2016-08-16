@@ -3,10 +3,20 @@ using UnityEngine.UI;
 using System.Collections;
 using System;
 
+public enum Mode
+{
+    Default,
+    Game,
+    Edit,
+}
+
 public class UserInterface : MonoBehaviour
 {
+    public static Action<Mode> OnModeChanged;
+
     [Header("UI Elements")]
     public AnimatedButton startButton;
+    public AnimatedButton editButton;
     public AnimatedButton settingsButton;
     public GameObject topBar;
     public GameObject bottomBar;
@@ -49,6 +59,8 @@ public class UserInterface : MonoBehaviour
         }
     }
 
+    Mode m_mode = Mode.Default;
+
     RectTransform m_TextPanelRect;
     RectTransform m_gameClearRect;
     TextSequence m_TextSequence;
@@ -56,11 +68,20 @@ public class UserInterface : MonoBehaviour
 
     void OnEnable()
     {
+        editButton.onClick.AddListener(() => ToggleMode());
         GameManager.OnGameStateChanged += GameManager_OnGameStateChanged;
+        ShelfCleaning.OnCleaningGameOpen += ShelfCleaning_OnCleaningGameOpen;
+    }
+
+    private void ShelfCleaning_OnCleaningGameOpen(string obj)
+    {
+        Debug.Log(obj);
+        topBar.GetComponent<AnimatedSlide>().SlideOut();
     }
 
     void OnDisable()
     {
+        editButton.onClick.RemoveAllListeners();
         GameManager.OnGameStateChanged -= GameManager_OnGameStateChanged;
     }
 
@@ -71,17 +92,45 @@ public class UserInterface : MonoBehaviour
             case GameState.Default:
                 settingsButton.GetComponent<AnimatedSlide>().SlideOut();
                 startButton.GetComponent<AnimatedSlide>().SlideOut();
+                editButton.GetComponent<AnimatedSlide>().SlideOut();
                 topBar.GetComponent<AnimatedSlide>().SlideOut();
                 bottomBar.GetComponent<AnimatedSlide>().SlideOut();
                 break;
             case GameState.Pregame:
                 startButton.GetComponent<AnimatedSlide>().SlideIn();
+                editButton.GetComponent<AnimatedSlide>().SlideIn();
                 settingsButton.GetComponent<AnimatedSlide>().SlideIn();
                 topBar.GetComponent<CurrencyBar>().UpdateGems(DataManager.ReadIntData(DataManager.totalGem));
                 topBar.GetComponent<AnimatedSlide>().SlideIn();
                 break;
             case GameState.Playing:
                 StartSequence();
+                break;
+        }
+    }
+
+    protected void ModeChanged()
+    {
+        Debug.Log("Mode changed to " + m_mode.ToString());
+
+        if (OnModeChanged != null)
+            OnModeChanged(m_mode);
+
+        switch (m_mode)
+        {
+            case Mode.Edit:
+                settingsButton.GetComponent<AnimatedSlide>().SlideIn();
+                editButton.GetComponent<AnimatedSlide>().SlideIn();
+                topBar.GetComponent<AnimatedSlide>().SlideIn();
+                bottomBar.GetComponent<AnimatedSlide>().SlideOut();
+                startButton.GetComponent<AnimatedSlide>().SlideOut();
+                break;
+            case Mode.Game:
+                topBar.GetComponent<AnimatedSlide>().SlideIn();
+                startButton.GetComponent<AnimatedSlide>().SlideIn();
+                settingsButton.GetComponent<AnimatedSlide>().SlideIn();
+                editButton.GetComponent<AnimatedSlide>().SlideIn();
+                bottomBar.GetComponent<AnimatedSlide>().SlideOut();
                 break;
         }
     }
@@ -124,16 +173,17 @@ public class UserInterface : MonoBehaviour
         yield return StartCoroutine(sequence.dayTextTyper.RunTypeText(headline));
         yield return StartCoroutine(sequence.messageTextTyper.RunTypeText(info));
 
-        sequence.FlashClose();
+        sequence.FlashTapToClose();
 
         button.onClick.AddListener(() => arrival.GetComponent<Popup>().Close());
         button.onClick.AddListener(() => sequence.FadeText(0.25f));
-        button.onClick.AddListener(() => sequence.FlashClose(false));
+        button.onClick.AddListener(() => sequence.FlashTapToClose(false));
     }
 
     public void StartSequence()
     {
         startButton.GetComponent<AnimatedSlide>().SlideOut();
+        editButton.GetComponent<AnimatedSlide>().SlideOut();
         bottomBar.GetComponent<AnimatedSlide>().SlideIn();
 
         if ((DataManager.ReadIntData("LIFE") > 0) || (GameManager.dayScene > 1))
@@ -192,9 +242,9 @@ public class UserInterface : MonoBehaviour
         gotoShelf.enabled = true;
         gotoBag.enabled = true;
 
-        gotoSleep.GetComponent<ShakingAnimation>().StartAnimation();
-        gotoShelf.GetComponent<ShakingAnimation>().StartAnimation();
-        gotoBag.GetComponent<ShakingAnimation>().StartAnimation();
+        gotoSleep.GetComponent<AnimatedShake>().StartAnimation();
+        gotoShelf.GetComponent<AnimatedShake>().StartAnimation();
+        gotoBag.GetComponent<AnimatedShake>().StartAnimation();
 
         GameManager.hasDayStarted = true;
         GameManager.CheckifGameOver();
@@ -308,5 +358,35 @@ public class UserInterface : MonoBehaviour
 
         yield return new WaitForSeconds(0.1f);
         btnHome.SetActive(true);
+    }
+
+    public void SetMode(Mode mode)
+    {
+        if (mode != m_mode)
+        {
+            m_mode = mode;
+            ModeChanged();
+        }
+    }
+
+    public Mode GetMode()
+    {
+        return m_mode;
+    }
+
+    public void ToggleMode()
+    {
+        ImageToggle toggle = editButton.GetComponent<ImageToggle>();
+
+        toggle.Toggle();
+
+        if (toggle.isDefault)
+        {
+            SetMode(Mode.Game);
+        }
+        else
+        {
+            SetMode(Mode.Edit);
+        }
     }
 }

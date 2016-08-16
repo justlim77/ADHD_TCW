@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 
-public class CameraControl : MonoBehaviour {
-
+public class CameraControl : MonoBehaviour
+{
     public delegate void CameraReachedEventHandler(object sender);
     public static event CameraReachedEventHandler OnCameraReached;
 
@@ -15,6 +16,7 @@ public class CameraControl : MonoBehaviour {
     public float timeToReach = 2.0f; 
     public float CamSpeed = 5.0f;
     public float panSpeed = 1.0f;
+    public float touchPanFactor = 0.1f;
     public float panLowerLimit = 0.0f;
     public float panUpperLimit = 10.0f;
     public iTween.EaseType easeType = iTween.EaseType.easeOutQuart;
@@ -39,11 +41,18 @@ public class CameraControl : MonoBehaviour {
     void OnEnable()
     {
         GameManager.OnGameStateChanged += GameManager_OnGameStateChanged;
+        ShelfCleaning.OnCleaningGameOpen += ShelfCleaning_OnCleaningGameOpen;
+    }
+
+    private void ShelfCleaning_OnCleaningGameOpen(string obj)
+    {
+        m_allowTouchPanning = false;
     }
 
     void OnDisable()
     {
         GameManager.OnGameStateChanged -= GameManager_OnGameStateChanged;
+        ShelfCleaning.OnCleaningGameOpen -= ShelfCleaning_OnCleaningGameOpen;
     }
 
     private void GameManager_OnGameStateChanged(object sender, GameState e)
@@ -53,6 +62,9 @@ public class CameraControl : MonoBehaviour {
             case GameState.Default:
                 Initialize();
                 StartCoroutine(RunCamToPlayArea());
+                break;
+            case GameState.Minigame:
+                m_allowTouchPanning = false;
                 break;
         }
     }
@@ -94,6 +106,7 @@ public class CameraControl : MonoBehaviour {
         locations.Add(6, laundryRoomPos);
 	}
 
+    Vector3 velocity = Vector3.zero;
     void Update()
     {
         // If touch panning isn't allowed, return
@@ -105,7 +118,10 @@ public class CameraControl : MonoBehaviour {
             if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Moved)
             {
                 Vector2 touchDelta = Input.GetTouch(0).deltaPosition;
-                transform.Translate(-touchDelta.x * panSpeed, -touchDelta.y * panSpeed, 0);
+                transform.Translate(0.0f, -touchDelta.y * (panSpeed * touchPanFactor) * Time.deltaTime, 0.0f);
+                Vector3 newPos = transform.position;
+                newPos.y = Mathf.Clamp(newPos.y, panLowerLimit, panUpperLimit);
+                transform.position = newPos;
             }
         }
         else if (Application.platform == RuntimePlatform.WindowsEditor)
@@ -124,8 +140,8 @@ public class CameraControl : MonoBehaviour {
                 }
 
                 newPos.y = Mathf.Clamp(newPos.y, panLowerLimit, panUpperLimit);
-
-                transform.position = newPos;
+                transform.DOMoveY(newPos.y, 0.1f);
+                //transform.position = Vector3.SmoothDamp(transform.position, newPos, ref velocity, 0.3f);
             }
         }
     }
@@ -220,5 +236,10 @@ public class CameraControl : MonoBehaviour {
     void MoveOnUpdateCallback(Vector2 value)
     {
         Camera.main.transform.position = value;
+    }
+
+    public void AllowPan(bool value)
+    {
+        m_allowTouchPanning = value;
     }
 }

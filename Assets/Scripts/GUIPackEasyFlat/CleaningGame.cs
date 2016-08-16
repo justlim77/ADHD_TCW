@@ -1,9 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
+using System;
 
-public class DustInitialize : MonoBehaviour
+public class CleaningGame : MonoBehaviour
 {
+    public static event Action<string> OnDustCleared;
+
     public SettingSequence shelfPanel;
     public Transform dustPrefab;
 
@@ -26,12 +29,25 @@ public class DustInitialize : MonoBehaviour
         shelfPanel_ = shelfPanel;
     }
 
+    void Start()
+    {
+        LoadDust();
+    }
+
+    protected static void DustCleared()
+    {
+        if (OnDustCleared != null)
+            OnDustCleared("Dust cleared");
+    }
+
     public void LoadDust()
     {
         if (!GameManager.isCleanShelfDone)
         {
             isLoadDone = false;
             Debug.Log("Loading Dust");
+
+            transform.position = new Vector3(transform.position.x, Camera.main.transform.position.y, transform.position.z);
 
             sr = GetComponent<SpriteRenderer>();
             min = sr.bounds.min;
@@ -44,7 +60,7 @@ public class DustInitialize : MonoBehaviour
 
             for (int i = 0; i < dustSpawn; i++)
             {
-                dirt = Instantiate(dustPrefab, new Vector2(Random.Range(min.x, max.x), Random.Range(min.y, max.y)), Quaternion.identity) as Transform;
+                dirt = Instantiate(dustPrefab, new Vector2(UnityEngine.Random.Range(min.x, max.x), UnityEngine.Random.Range(min.y, max.y)), Quaternion.identity) as Transform;
                 dirt.SetParent(transform);
                 dirt.localScale = new Vector2(scale, scale);
             }
@@ -58,9 +74,13 @@ public class DustInitialize : MonoBehaviour
     {
         if(dirtParent.childCount <= 1)
         {
+            DustCleared();
+
             GameManager.SetInteractable(false);
             GameManager.isCleanShelfDone = true;
-            shelfPanel_.OpenSettings(true);
+            shelfPanel_.OpenSettings(true); // Show dust cleaned
+
+
 
             if((timer < 5) && (DataManager.ReadIntData(DataManager.acTwo) == 0))
                 DataManager.StoreIntData(DataManager.acTwo, 1);
