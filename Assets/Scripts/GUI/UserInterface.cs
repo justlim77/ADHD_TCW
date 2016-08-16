@@ -94,6 +94,7 @@ public class UserInterface : MonoBehaviour
 
     void ShowNoficationPopup(string headline, string info, params Action[] actions)
     {
+        popupOpener.popupPrefab = notificationPrefab;
         GameObject notification = popupOpener.GetOpenPopup();
         Notify notify = notification.GetComponent<Notify>();
         notify.headlineText.text = headline;
@@ -107,6 +108,17 @@ public class UserInterface : MonoBehaviour
         notify.confirmButton.onClick.AddListener(() => { notification.GetComponent<Popup>().Close(); });
     }
 
+    IEnumerator ShowArrivalPopup(string headline, string info)
+    {
+        popupOpener.popupPrefab = arrivalPrefab;
+        GameObject arrival = popupOpener.GetOpenPopup();
+        TextSequence sequence = arrival.GetComponent<TextSequence>();
+        yield return StartCoroutine(sequence.dayTextTyper.RunTypeText(headline));
+        yield return StartCoroutine(sequence.messageTextTyper.RunTypeText(info));
+        yield return new WaitForSeconds(2.0f);
+        arrival.GetComponent<Popup>().Close();
+    }
+
     public void StartSequence()
     {
         startButton.GetComponent<AnimatedSlide>().SlideOut();
@@ -115,9 +127,9 @@ public class UserInterface : MonoBehaviour
         if ((DataManager.ReadIntData("LIFE") > 0) || (GameManager.dayScene > 1))
         {
             if ((GameManager.dayScene <= 3) && (!GameManager.isTempPause))
-                StartCoroutine(RunStartSequence());
+                StartCoroutine(ArrivalSequence());
             else
-                StartCoroutine(RunEndSequence());
+                StartCoroutine(EndSequence());
         }
         else
         {
@@ -130,13 +142,9 @@ public class UserInterface : MonoBehaviour
         }
     }
 
-    IEnumerator RunStartSequence()
+    IEnumerator ArrivalSequence()
     {
         // Show day number and time arrived at home
-        var arrival = Instantiate(arrivalPrefab);
-        arrival.transform.SetParent(this.transform);
-        TextSequence sequence = arrival.GetComponent<TextSequence>();
-        yield return StartCoroutine(sequence.RunFadeCanvas(1.0f, 1.0f));
 
         // Set gameplay elements active
         foreach (GameObject go in gameplayElements)
@@ -144,35 +152,34 @@ public class UserInterface : MonoBehaviour
             go.SetActive(true);
         }
 
+        string headline = "";
+        string info = "";
+
         switch (GameManager.dayScene)
         {
             case 1:
                 GameManager.gameHour = 5;
-                yield return sequence.dayTextTyper.RunTypeText("Day 1");
-                yield return sequence.messageTextTyper.RunTypeText("You arrived home from work at 5:00 P.M.");
+                headline = "Day 1";
+                info = "You arrived home from work at 5:00 P.M.";
                 break;
             case 2:
                 GameManager.gameHour = 6;
-                yield return sequence.dayTextTyper.RunTypeText("Day 2");
-                yield return sequence.messageTextTyper.RunTypeText("You arrived home from work at 6:00 P.M. due to bad traffic.");
+                headline = "Day 2";
+                info = "You arrived home from work at 6:00 P.M. due to bad traffic.";
                 break;
             case 3:
                 GameManager.gameHour = 7;
-                yield return sequence.dayTextTyper.RunTypeText("Day 3");
-                yield return sequence.messageTextTyper.RunTypeText("You arrived home from work at 7:00 P.M. as you had to overtime at work.");
+                headline = "Day 3";
+                info = "You arrived home from work at 7:00 P.M. as you had to overtime at work.";
                 break;
         }
 
-        yield return new WaitForSeconds(2.0f);
-
-        // Fade out text panel canvas group alpha
-        yield return StartCoroutine(sequence.RunFadeCanvas(0.0f, 0.5f));
-
-        Destroy(arrival);
+        yield return StartCoroutine(ShowArrivalPopup(headline, info));
 
         gotoSleep.enabled = true;
         gotoShelf.enabled = true;
         gotoBag.enabled = true;
+
         gotoSleep.GetComponent<ShakingAnimation>().StartAnimation();
         gotoShelf.GetComponent<ShakingAnimation>().StartAnimation();
         gotoBag.GetComponent<ShakingAnimation>().StartAnimation();
@@ -181,7 +188,7 @@ public class UserInterface : MonoBehaviour
         GameManager.CheckifGameOver();
     }
 
-    IEnumerator RunEndSequence()
+    IEnumerator EndSequence()
     {
         //Initialize
         //for (int i = 0; i < headerText.Length; i++)

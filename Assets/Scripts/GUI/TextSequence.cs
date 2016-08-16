@@ -18,11 +18,6 @@ public class TextSequence : MonoBehaviour
         }
     }
 
-    void OnEnable()
-    {
-        image.canvasRenderer.SetAlpha(0.0f);
-    }
-
     public IEnumerator RunFadeCanvas(float targetAlpha, float fadeDuration)
     {
         iTween.ValueTo(gameObject, iTween.Hash(

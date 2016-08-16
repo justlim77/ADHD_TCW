@@ -10,35 +10,28 @@ public class TextTyper : MonoBehaviour
     public AudioClip typeSound1;
     public AudioClip typeSound2;
 
-    private Text m_Text;
-    private WaitForSeconds m_LetterPause;
-    bool _skip = false;
-
-    void Awake()
+    Text _text;
+    Text text
     {
-        m_Text = GetComponent<Text>();
-        m_LetterPause = new WaitForSeconds(letterPause);
+        get
+        {
+            if (_text == null)
+                _text = GetComponent<Text>();
+            return _text;
+        }
     }
 
-    void Start()
+    WaitForSeconds m_LetterPause;
+    bool _skip = false;
+
+    void OnEnable()
     {
-        message = m_Text.text;
-        m_Text.text = string.Empty;
+        Initialize();
     }
 
     public bool Initialize()
     {
         bool result = true;
-
-        if (m_Text == null)
-        {
-            m_Text = GetComponent<Text>();
-            if (m_Text == null)
-            {
-                result = false;
-                Debug.Log("Failed to initialize TextTyper!");
-            }
-        }
 
         m_LetterPause = new WaitForSeconds(letterPause);
 
@@ -57,7 +50,7 @@ public class TextTyper : MonoBehaviour
         // Type staggered chars
         foreach (char letter in messageArray)
         {
-            m_Text.text += letter;
+            text.text += letter;
             if (typeSound1 && typeSound2)
                 AudioManager.Instance.RandomizeSFX(typeSound1, typeSound2);
             if (_skip)
@@ -74,19 +67,18 @@ public class TextTyper : MonoBehaviour
 
     public void Clear()
     {
-        if (m_Text != null)
-            m_Text.text = string.Empty;
+        text.text = string.Empty;
         message = string.Empty;
         _skip = false;
     }
 
     public void Skip()
     {
-        m_Text.text = message;
+        text.text = message;
     }
 
     public void FadeText()
     {
-        m_Text.CrossFadeAlpha(0.0f, 1.0f, true);
+        text.CrossFadeAlpha(0.0f, 1.0f, true);
     }
 }

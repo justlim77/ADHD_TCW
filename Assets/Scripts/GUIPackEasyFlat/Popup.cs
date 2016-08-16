@@ -22,8 +22,9 @@ public class Popup : MonoBehaviour
     public void Close()
     {
         var animator = GetComponent<Animator>();
-        if (animator.GetCurrentAnimatorStateInfo(0).IsName("Open"))
-            animator.Play("Close");
+        if(animator != null)
+            if (animator.GetCurrentAnimatorStateInfo(0).IsName("Open"))
+                animator.Play("Close");
 
         RemoveBackground();
         StartCoroutine(RunPopupDestroy());
