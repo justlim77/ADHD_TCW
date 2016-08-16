@@ -9,6 +9,7 @@ using UnityEngine;
 public class PopupOpener : MonoBehaviour
 {
     public GameObject popupPrefab;
+    public Vector3 initialScale = Vector3.zero;
 
     Canvas _canvas;
     protected Canvas m_canvas
@@ -28,7 +29,7 @@ public class PopupOpener : MonoBehaviour
     {
         var popup = Instantiate(popupPrefab) as GameObject;
         popup.SetActive(true);
-        popup.transform.localScale = Vector3.zero;
+        popup.transform.localScale = initialScale;
 
         // BEGIN_MECANIM_HACK
         // This works around a Mecanim bug present in Unity 5.2.1 where
@@ -49,7 +50,7 @@ public class PopupOpener : MonoBehaviour
     {
         var popup = Instantiate(popupPrefab) as GameObject;
         popup.SetActive(true);
-        popup.transform.localScale = Vector3.zero;
+        popup.transform.localScale = initialScale;
 
         // BEGIN_MECANIM_HACK
         // This works around a Mecanim bug present in Unity 5.2.1 where

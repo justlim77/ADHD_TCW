@@ -1,39 +1,54 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
+using DG.Tweening;
 
 public class TextSequence : MonoBehaviour
 {
     public TextTyper dayTextTyper;
     public TextTyper messageTextTyper;
+    public Graphic closeGraphic;
 
-    Image _image;
-    Image image
+    public bool Initialize()
     {
-        get
+        dayTextTyper.Clear();
+        messageTextTyper.Clear();
+        closeGraphic.canvasRenderer.SetAlpha(0.0f);
+        return true;
+    }
+
+    public void FadeText(float fadeDuration)
+    {
+        dayTextTyper.FadeText(fadeDuration);
+        messageTextTyper.FadeText(fadeDuration);
+    }
+
+    public void Skip()
+    {
+        // Skip headline if not skipped yet
+        if (dayTextTyper.skipped == false)
         {
-            if (_image == null)
-                _image = GetComponent<Image>();
-            return _image;
+            dayTextTyper.Skip();
+            return;
         }
+
+        // Skip info if not skipped yet
+        if (messageTextTyper.skipped == false)
+        {
+            messageTextTyper.Skip();
+            return;
+        }       
     }
 
-    public IEnumerator RunFadeCanvas(float targetAlpha, float fadeDuration)
+    public void FlashClose(bool value = true)
     {
-        iTween.ValueTo(gameObject, iTween.Hash(
-            "from", image.canvasRenderer.GetAlpha(),
-            "to", targetAlpha,
-            "time", fadeDuration,
-            "onupdatetarget", gameObject,
-            "onupdate", "FadeCanvasOnUpdateCallback",
-            "easetype", iTween.EaseType.linear
-            )
-        );
-        yield return null;
-    }
-
-    void FadeCanvasOnUpdateCallback(float value)
-    {
-        image.canvasRenderer.SetAlpha(value);
+        if (value)
+        {
+            closeGraphic.canvasRenderer.SetAlpha(1.0f); // Turn on visibility
+            //closeGraphic.canvasRenderer.SetColor(Color.white);  // Set color initially to white
+            closeGraphic.DOColor(Color.black, 1f).SetEase(Ease.Flash).SetLoops(-1, LoopType.Yoyo);  // Pingpong tween between black/white
+        }
+        else
+            closeGraphic.DOKill();       
     }
 }

@@ -95,6 +95,7 @@ public class UserInterface : MonoBehaviour
     void ShowNoficationPopup(string headline, string info, params Action[] actions)
     {
         popupOpener.popupPrefab = notificationPrefab;
+        popupOpener.initialScale = Vector3.zero;
         GameObject notification = popupOpener.GetOpenPopup();
         Notify notify = notification.GetComponent<Notify>();
         notify.headlineText.text = headline;
@@ -108,15 +109,26 @@ public class UserInterface : MonoBehaviour
         notify.confirmButton.onClick.AddListener(() => { notification.GetComponent<Popup>().Close(); });
     }
 
-    IEnumerator ShowArrivalPopup(string headline, string info)
+    IEnumerator ShowArrivalPopup(string headline, string info, params Action[] actions)
     {
         popupOpener.popupPrefab = arrivalPrefab;
+        popupOpener.initialScale = Vector3.one;
         GameObject arrival = popupOpener.GetOpenPopup();
+
         TextSequence sequence = arrival.GetComponent<TextSequence>();
+        sequence.Initialize();
+        var button = arrival.GetComponent<Popup>().GetBackground().AddComponent<Button>();
+        button.transition = Selectable.Transition.None;
+        button.onClick.AddListener(() => sequence.Skip());
+
         yield return StartCoroutine(sequence.dayTextTyper.RunTypeText(headline));
         yield return StartCoroutine(sequence.messageTextTyper.RunTypeText(info));
-        yield return new WaitForSeconds(2.0f);
-        arrival.GetComponent<Popup>().Close();
+
+        sequence.FlashClose();
+
+        button.onClick.AddListener(() => arrival.GetComponent<Popup>().Close());
+        button.onClick.AddListener(() => sequence.FadeText(0.25f));
+        button.onClick.AddListener(() => sequence.FlashClose(false));
     }
 
     public void StartSequence()
@@ -197,7 +209,7 @@ public class UserInterface : MonoBehaviour
         //Fade in White Canvas
         gameClearPanel.gameObject.SetActive(true);
 
-        yield return m_gameSequence.RunFadeCanvas(1.0f, 1.0f);
+        //yield return m_gameSequence.RunFadeCanvas(1.0f, 1.0f);
         //yield return new WaitForSeconds(m_gameSequence.fadeDuration);
 
         //Calculate Results Overall

@@ -30,6 +30,11 @@ public class Popup : MonoBehaviour
         StartCoroutine(RunPopupDestroy());
     }
 
+    public GameObject GetBackground()
+    {
+        return m_background;
+    }
+
     // We destroy the popup automatically 0.5 seconds after closing it.
     // The destruction is performed asynchronously via a coroutine. If you
     // want to destroy the popup at the exact time its closing animation is

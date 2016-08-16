@@ -14,6 +14,9 @@ public class CameraControl : MonoBehaviour {
     public bool animate = true;
     public float timeToReach = 2.0f; 
     public float CamSpeed = 5.0f;
+    public float panSpeed = 1.0f;
+    public float panLowerLimit = 0.0f;
+    public float panUpperLimit = 10.0f;
     public iTween.EaseType easeType = iTween.EaseType.easeOutQuart;
     public enum ZoomType { In, Out };
     public float zoomInterval = 1.0f;
@@ -31,6 +34,7 @@ public class CameraControl : MonoBehaviour {
     ZoomType m_ZoomType;
     float m_OriginalOrthoSize;
     float m_ZoomedOrthoSize;
+    bool m_allowTouchPanning = false;
 
     void OnEnable()
     {
@@ -55,13 +59,16 @@ public class CameraControl : MonoBehaviour {
 
     bool Initialize()
     {
-        Camera.main.transform.position = StartPos;
+        Camera.main.transform.position = StartPos;  // Reset camera position to start
+        m_allowTouchPanning = false;    // Disable camera touch panning
         return true;
     }
 
     protected void CameraReached()
     {
         Debug.Log("Camera reached destination.");
+        m_allowTouchPanning = true;
+
         if (OnCameraReached != null)
             OnCameraReached(this);
     }
@@ -86,6 +93,42 @@ public class CameraControl : MonoBehaviour {
         locations.Add(5, kitchenPos);
         locations.Add(6, laundryRoomPos);
 	}
+
+    void Update()
+    {
+        // If touch panning isn't allowed, return
+        if (!m_allowTouchPanning)
+            return;
+
+        if (Application.platform == RuntimePlatform.Android)
+        {
+            if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Moved)
+            {
+                Vector2 touchDelta = Input.GetTouch(0).deltaPosition;
+                transform.Translate(-touchDelta.x * panSpeed, -touchDelta.y * panSpeed, 0);
+            }
+        }
+        else if (Application.platform == RuntimePlatform.WindowsEditor)
+        {
+            if (Input.GetMouseButton(1))
+            {
+                var newPos = transform.position;
+
+                if (Input.GetAxis("Mouse Y") > 0)
+                {
+                    newPos += new Vector3(0.0f, -Input.GetAxisRaw("Mouse Y") * Time.deltaTime * panSpeed, 0.0f);
+                }
+                else if (Input.GetAxis("Mouse Y") < 0)
+                {
+                    newPos += new Vector3(0.0f, -Input.GetAxisRaw("Mouse Y") * Time.deltaTime * panSpeed, 0.0f);
+                }
+
+                newPos.y = Mathf.Clamp(newPos.y, panLowerLimit, panUpperLimit);
+
+                transform.position = newPos;
+            }
+        }
+    }
 
     public void CameraToPlayArea()
     {

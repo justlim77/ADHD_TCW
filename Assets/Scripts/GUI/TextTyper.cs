@@ -22,7 +22,10 @@ public class TextTyper : MonoBehaviour
     }
 
     WaitForSeconds m_LetterPause;
+
     bool _skip = false;
+    public bool skipped
+    { get { return _skip; } }
 
     void OnEnable()
     {
@@ -34,6 +37,7 @@ public class TextTyper : MonoBehaviour
         bool result = true;
 
         m_LetterPause = new WaitForSeconds(letterPause);
+        _skip = false;
 
         return result;
     }
@@ -55,14 +59,17 @@ public class TextTyper : MonoBehaviour
                 AudioManager.Instance.RandomizeSFX(typeSound1, typeSound2);
             if (_skip)
             {
-                Skip();
-                yield break;
+                yield return 0;
+                //text.text = message;
+                //yield break;
             }
             else
                 yield return m_LetterPause;
             //yield return 0;
             //yield return m_LetterPause;
         }
+
+        _skip = true;
     }
 
     public void Clear()
@@ -74,11 +81,11 @@ public class TextTyper : MonoBehaviour
 
     public void Skip()
     {
-        text.text = message;
+        _skip = true;
     }
 
-    public void FadeText()
+    public void FadeText(float fadeDuration = 1.0f)
     {
-        text.CrossFadeAlpha(0.0f, 1.0f, true);
+        text.CrossFadeAlpha(0.0f, fadeDuration, false);
     }
 }
