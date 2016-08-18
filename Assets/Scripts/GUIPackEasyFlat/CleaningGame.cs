@@ -80,7 +80,7 @@ public class CleaningGame : MonoBehaviour
             GameManager.isCleanShelfDone = true;
             shelfPanel_.OpenSettings(true); // Show dust cleaned
 
-
+            
 
             if((timer < 5) && (DataManager.ReadIntData(DataManager.acTwo) == 0))
                 DataManager.StoreIntData(DataManager.acTwo, 1);
