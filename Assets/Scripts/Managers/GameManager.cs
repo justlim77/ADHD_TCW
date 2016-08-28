@@ -16,9 +16,9 @@ public class GameManager : Singleton<GameManager>
     public static bool isBagDone = false;
 
     //Current Bar Level - 0 = Game Over
-    public static float lvlPositivity = 2;
-    public static float lvlCleanliness = 2; 
-    public static float lvlStamina = 5; 
+    public static float lvl_mood = 2;
+    public static float lvl_hygiene = 2; 
+    public static float lvl_stamina = 5; 
 
     //AI Progress Reward
     public static int[] gameReward = { 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -72,6 +72,12 @@ public class GameManager : Singleton<GameManager>
         CameraControl.OnCameraReached += CameraControl_OnCameraReached;
         SceneManager.sceneLoaded += SceneManager_sceneLoaded;
         ShelfCleaning.OnCleaningGameCompleted += ShelfCleaning_OnCleaningGameCompleted;
+        ShelfCleaning.OnCleaningGameOpen += ShelfCleaning_OnCleaningGameOpen;
+    }
+
+    private void ShelfCleaning_OnCleaningGameOpen(string obj)
+    {
+
     }
 
     private void ShelfCleaning_OnCleaningGameCompleted(string obj)
@@ -81,6 +87,7 @@ public class GameManager : Singleton<GameManager>
 
     private void SceneManager_sceneLoaded(UnityEngine.SceneManagement.Scene arg0, UnityEngine.SceneManagement.LoadSceneMode arg1)
     {
+        Debug.Log(string.Format("{0} scene loaded in {1} load scene mode", arg0.name, arg1.ToString()));
         Initialize();
     }
 
@@ -106,9 +113,9 @@ public class GameManager : Singleton<GameManager>
         isInScenario = false;
         dayScene = 1;
 
-        lvlPositivity = 5;
-        lvlCleanliness = 5;
-        lvlStamina = 5;
+        lvl_mood = 5;
+        lvl_hygiene = 5;
+        lvl_stamina = 5;
 
         for (int i = 0; i < gameReward.Length; i++)
             gameReward[i] = 0;
@@ -142,13 +149,13 @@ public class GameManager : Singleton<GameManager>
     void CheckIsActionDone()
     {
         if (!isCleanShelfDone)
-            lvlCleanliness--;
+            lvl_hygiene--;
 
         if (!isBagDone)
-            lvlPositivity--;
+            lvl_mood--;
 
-        UpdateMessinessBar();
-        UpdateNegativeBar();
+        UpdateHygieneBar();
+        UpdateMoodBar();
     }
 
     void Awake()
@@ -180,23 +187,23 @@ public class GameManager : Singleton<GameManager>
 
     public static void CheckifGameOver()
     {
-        if ((lvlCleanliness <= 0) || (lvlPositivity <= 0))
+        if ((lvl_hygiene <= 0) || (lvl_mood <= 0))
             gameOver_.PauseGame(true);
     }
 
-    public static void UpdateMessinessBar()
+    public static void UpdateHygieneBar()
     {
-        sliMessiness_.value = lvlCleanliness / maxBar;
+        sliMessiness_.value = lvl_hygiene / maxBar;
     }
 
-    public static void UpdateNegativeBar()
+    public static void UpdateMoodBar()
     {
-        sliNegative_.value = lvlPositivity / maxBar;
+        sliNegative_.value = lvl_mood / maxBar;
     }
 
-    public static void UpdateStaminaBar()
+    public static void UpdateVitalityBar()
     {
-        sliTiredness_.value = lvlStamina / maxStamina;
+        sliTiredness_.value = lvl_stamina / maxStamina;
     }
 
     public static void SetInteractable(bool isInteractable)
@@ -207,8 +214,8 @@ public class GameManager : Singleton<GameManager>
 
     public void SetInteractableWithoutScript(bool isInteractable)
     {
-        btnPause.interactable = isInteractable;
-        btnSettings.interactable = isInteractable;
+        //btnPause.interactable = isInteractable;
+        //btnSettings.interactable = isInteractable;
     }
 
     public static int CalculateScore(int cat)

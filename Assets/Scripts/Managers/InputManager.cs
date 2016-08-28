@@ -11,8 +11,8 @@ using UnityEngine.SceneManagement;
 using System;
 
 [Serializable]
-public class InputManager : Singleton<InputManager> {
-
+public class InputManager : Singleton<InputManager>
+{
     // Set to protected to prevent calling constructor
     protected InputManager() { }
 
@@ -21,6 +21,11 @@ public class InputManager : Singleton<InputManager> {
         if (Input.GetKeyDown(KeyCode.R))
         {
             Restart();
+        }
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Quit();
         }
     }
 

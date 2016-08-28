@@ -8,7 +8,7 @@ public class DustRemover : MonoBehaviour
     SpriteRenderer sr;
     WaitForSeconds m_WaitSlideDelay;
 
-    void OnMouseEnter ()
+    void OnMouseEnter()
     {
         Destroy(gameObject);
         CleaningGame.DirtNumber();

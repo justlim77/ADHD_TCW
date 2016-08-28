@@ -1,10 +1,8 @@
 ﻿using UnityEngine;
 
-public class Singleton<T> : MonoBehaviour where T : MonoBehaviour {
-
+public class Singleton<T> : MonoBehaviour where T : MonoBehaviour
+{
     private static T _instance;
-
-    private static object _lock = new object();
 
     public static T Instance {
         get {
@@ -16,33 +14,21 @@ public class Singleton<T> : MonoBehaviour where T : MonoBehaviour {
                 return null;
             }
 
-            lock(_lock) {
-                if (_instance == null) {
-                    _instance = (T)FindObjectOfType(typeof(T));
+            if (_instance == null)
+            {
+                GameObject singleton = new GameObject();
+                _instance = singleton.AddComponent<T>();
+                singleton.name = typeof(T).ToString();
 
-                    if (FindObjectsOfType(typeof(T)).Length > 1) {
-                        //Debug.LogError("[Singleton] Error! " +
-                        //    "There is more than 1 singleton in the scene.");
-                        return _instance;
-                    }
-                }
+                DontDestroyOnLoad(singleton);
 
-                if (_instance == null)
-                {
-                    GameObject singleton = new GameObject();
-                    _instance = singleton.AddComponent<T>();
-                    singleton.name = typeof(T).ToString();
+                //Debug.Log("[Singleton] An instance of " + typeof(T) + "is needed in the scene, so '"
+                //    + singleton + "' was created with DontDestroyOnLoad().");
+            }
 
-                    DontDestroyOnLoad(singleton);
-
-                    //Debug.Log("[Singleton] An instance of " + typeof(T) + "is needed in the scene, so '"
-                    //    + singleton + "' was created with DontDestroyOnLoad().");
-                }
-
-                else {
-                    //Debug.Log("[Singleton] Using instance already created: " +
-                    //    _instance.gameObject.name);
-                }
+            else {
+                //Debug.Log("[Singleton] Using instance already created: " +
+                //    _instance.gameObject.name);
             }
 
             return _instance;

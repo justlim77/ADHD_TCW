@@ -23,6 +23,7 @@ public class UserInterface : MonoBehaviour
 
     public GameObject notificationPrefab;
     public GameObject arrivalPrefab;
+    public GameObject chatPanelPrefab;
 
     public GameObject[] gameplayElements;
 
@@ -69,20 +70,30 @@ public class UserInterface : MonoBehaviour
     void OnEnable()
     {
         editButton.onClick.AddListener(() => ToggleMode());
+
         GameManager.OnGameStateChanged += GameManager_OnGameStateChanged;
         ShelfCleaning.OnCleaningGameOpen += ShelfCleaning_OnCleaningGameOpen;
+        ShelfCleaning.OnCleaningGameCompleted += ShelfCleaning_OnCleaningGameCompleted;
     }
 
     private void ShelfCleaning_OnCleaningGameOpen(string obj)
     {
+        //topBar.GetComponent<AnimatedSlide>().SlideOut();
         Debug.Log(obj);
-        topBar.GetComponent<AnimatedSlide>().SlideOut();
+    }
+
+    private void ShelfCleaning_OnCleaningGameCompleted(string obj)
+    {
+        //topBar.GetComponent<AnimatedSlide>().SlideIn();
+        ShowNoficationPopup(obj, "");
     }
 
     void OnDisable()
     {
         editButton.onClick.RemoveAllListeners();
         GameManager.OnGameStateChanged -= GameManager_OnGameStateChanged;
+        ShelfCleaning.OnCleaningGameOpen -= ShelfCleaning_OnCleaningGameOpen;
+        ShelfCleaning.OnCleaningGameCompleted -= ShelfCleaning_OnCleaningGameCompleted;
     }
 
     private void GameManager_OnGameStateChanged(object sender, GameState e)
@@ -184,6 +195,7 @@ public class UserInterface : MonoBehaviour
     {
         startButton.GetComponent<AnimatedSlide>().SlideOut();
         editButton.GetComponent<AnimatedSlide>().SlideOut();
+        topBar.GetComponent<AnimatedSlide>().SlideOut();
         bottomBar.GetComponent<AnimatedSlide>().SlideIn();
 
         if ((DataManager.ReadIntData("LIFE") > 0) || (GameManager.dayScene > 1))
@@ -199,7 +211,8 @@ public class UserInterface : MonoBehaviour
                 "Uh oh!",
                 "Looks like you're out of Energy.",
                 startButton.GetComponent<AnimatedSlide>().SlideIn,
-                bottomBar.GetComponent<AnimatedSlide>().SlideOut
+                bottomBar.GetComponent<AnimatedSlide>().SlideOut,
+                topBar.GetComponent<AnimatedSlide>().SlideIn
                 );
         }
     }

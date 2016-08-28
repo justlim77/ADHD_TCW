@@ -4,6 +4,8 @@ using System.Collections.Generic;
 
 public class Scenario : MonoBehaviour
 {
+    public static event System.Action<string> OnScenarioOpened;
+
     public enum ScenarioType
     {
         Bag,
@@ -14,8 +16,6 @@ public class Scenario : MonoBehaviour
     public BoxCollider2D bcObj;
 
     public ScenarioType scenarioType;
-
-    public ChatPanel chatPanel;
 
     public string synopsis;
     public float synopsisDuration = 2.0f;
@@ -49,6 +49,13 @@ public class Scenario : MonoBehaviour
 
     Feedback m_CurrentFeedback;
     ParentResponse m_NextResponse;
+    ChatPanel m_chatPanel;
+
+    protected void ScenarioOpened()
+    {
+        if (OnScenarioOpened != null)
+            OnScenarioOpened(string.Format("{0} scenario opened", gameObject.name));
+    }
 
     public void SetBoxCollider(bool isActive)
     {
@@ -101,36 +108,39 @@ public class Scenario : MonoBehaviour
 
     IEnumerator BagScenario()
     {
-        chatPanel.Initialize();
+        m_chatPanel = GetComponent<PopupOpener>().GetOpenPopup().GetComponent<ChatPanel>();
+        m_chatPanel.Initialize();
+
+        ScenarioOpened();
 
         // Show synopsis
-        yield return chatPanel.TypeSynopsis(synopsis);
+        yield return m_chatPanel.TypeSynopsis(synopsis);
         yield return new WaitForSeconds(synopsisDuration);
-        chatPanel.synopsisText.FadeText();
-        yield return chatPanel.ShowParentIcon();
+        m_chatPanel.synopsisText.FadeText();
+        yield return m_chatPanel.ShowParentIcon();
 
         // Show parent response 1
-        chatPanel.PrepareResponse();
+        m_chatPanel.PrepareResponse();
         m_NextResponse = parent1;
-        yield return chatPanel.ShowParentResponses(m_NextResponse.response1.response, m_NextResponse.response2.response);
-        yield return chatPanel.WaitForResponse();
+        yield return m_chatPanel.ShowParentResponses(m_NextResponse.response1.response, m_NextResponse.response2.response);
+        yield return m_chatPanel.WaitForResponse();
         CurrentResponse = GetCurrentResponse(m_NextResponse);
         AddPotentialScore();
 
         // Show child response 1
         yield return new WaitForSeconds(responseDelay);
-        yield return chatPanel.ShowChildIcon();
-        yield return chatPanel.ShowChildResponse(m_NextResponse.response1.feedback.feedback);
+        yield return m_chatPanel.ShowChildIcon();
+        yield return m_chatPanel.ShowChildResponse(m_NextResponse.response1.feedback.feedback);
         yield return new WaitForSeconds(responseDelay);
         m_NextResponse = parent2;
 
         // Show parent response 2
-        chatPanel.PrepareResponse();
-        yield return chatPanel.ShowParentResponses(parent2.response1.response, parent2.response2.response);
-        yield return chatPanel.WaitForResponse();
+        m_chatPanel.PrepareResponse();
+        yield return m_chatPanel.ShowParentResponses(parent2.response1.response, parent2.response2.response);
+        yield return m_chatPanel.WaitForResponse();
         AddPotentialScore();
 
-        switch (chatPanel.GetResponseIndex) //Obtain Possible Reward for Parent2 Selection & Proceed Next
+        switch (m_chatPanel.GetResponseIndex) //Obtain Possible Reward for Parent2 Selection & Proceed Next
         {
             case 1:
                 m_CurrentFeedback = m_NextResponse.response1.feedback; 
@@ -145,16 +155,16 @@ public class Scenario : MonoBehaviour
 
         // Show child response 2A/2B
         yield return new WaitForSeconds(responseDelay);
-        yield return chatPanel.ShowChildResponse(m_CurrentFeedback.feedback);
+        yield return m_chatPanel.ShowChildResponse(m_CurrentFeedback.feedback);
         yield return new WaitForSeconds(responseDelay);
 
         // Show parent response 3A/3B
-        chatPanel.PrepareResponse();
-        yield return chatPanel.ShowParentResponses(m_NextResponse.response1.response, m_NextResponse.response2.response);
-        yield return chatPanel.WaitForResponse();
+        m_chatPanel.PrepareResponse();
+        yield return m_chatPanel.ShowParentResponses(m_NextResponse.response1.response, m_NextResponse.response2.response);
+        yield return m_chatPanel.WaitForResponse();
         AddPotentialScore();
 
-        switch (chatPanel.GetResponseIndex)
+        switch (m_chatPanel.GetResponseIndex)
         {
             case 1:
                 m_CurrentFeedback = parent3A.response1.feedback;
@@ -173,21 +183,21 @@ public class Scenario : MonoBehaviour
                 m_NextResponse = parent4;
                 break;
         }
-        CurrentResponse = chatPanel.GetResponseIndex == 1 ? parent1.response1 : parent1.response2;
+        CurrentResponse = m_chatPanel.GetResponseIndex == 1 ? parent1.response1 : parent1.response2;
 
         // Show child response 3A/3B
         yield return new WaitForSeconds(responseDelay);
-        yield return chatPanel.ShowChildResponse(m_CurrentFeedback.feedback);
+        yield return m_chatPanel.ShowChildResponse(m_CurrentFeedback.feedback);
         yield return new WaitForSeconds(responseDelay);
         yield return CheckState(m_CurrentFeedback);
 
         // Show parent response 4
-        chatPanel.PrepareResponse();
-        yield return chatPanel.ShowParentResponses(m_NextResponse.response1.response, m_NextResponse.response2.response);
-        yield return chatPanel.WaitForResponse();
+        m_chatPanel.PrepareResponse();
+        yield return m_chatPanel.ShowParentResponses(m_NextResponse.response1.response, m_NextResponse.response2.response);
+        yield return m_chatPanel.WaitForResponse();
         AddPotentialScore();
 
-        switch (chatPanel.GetResponseIndex)
+        switch (m_chatPanel.GetResponseIndex)
         {
             case 1:
                 m_CurrentFeedback = parent4.response1.feedback;
@@ -201,17 +211,17 @@ public class Scenario : MonoBehaviour
 
         // Show child response 4A/4B
         yield return new WaitForSeconds(responseDelay);
-        yield return chatPanel.ShowChildResponse(m_CurrentFeedback.feedback);
+        yield return m_chatPanel.ShowChildResponse(m_CurrentFeedback.feedback);
         yield return new WaitForSeconds(responseDelay);
         yield return CheckState(m_CurrentFeedback);
 
         // Show parent response 5A/5B
-        chatPanel.PrepareResponse();
-        yield return chatPanel.ShowParentResponses(m_NextResponse.response1.response, m_NextResponse.response2.response);
-        yield return chatPanel.WaitForResponse();
+        m_chatPanel.PrepareResponse();
+        yield return m_chatPanel.ShowParentResponses(m_NextResponse.response1.response, m_NextResponse.response2.response);
+        yield return m_chatPanel.WaitForResponse();
         AddPotentialScore();
 
-        switch (chatPanel.GetResponseIndex)
+        switch (m_chatPanel.GetResponseIndex)
         {
             case 1:
                 if (m_NextResponse == parent5A)
@@ -234,7 +244,7 @@ public class Scenario : MonoBehaviour
 
         // Show child response 5A/5B
         yield return new WaitForSeconds(responseDelay);
-        yield return chatPanel.ShowChildResponse(m_CurrentFeedback.feedback);
+        yield return m_chatPanel.ShowChildResponse(m_CurrentFeedback.feedback);
         yield return new WaitForSeconds(responseDelay);
         yield return CheckState(m_CurrentFeedback);
 
@@ -245,8 +255,8 @@ public class Scenario : MonoBehaviour
     {
         if (feedback.done)
         {
-            chatPanel.Done();
-            gameObject.SetActive(false);
+            m_chatPanel.Done();
+            //gameObject.SetActive(false);
             GameManager.isTempPause = false;
             GameManager.isBagDone = true;
 
@@ -254,33 +264,39 @@ public class Scenario : MonoBehaviour
             if((GameManager.CalculateScore(0) == 8) && (DataManager.ReadIntData(DataManager.acOne) == 0))
                 DataManager.StoreIntData(DataManager.acOne, 1);
 
-            yield break;
+            m_chatPanel.GetComponent<Popup>().Close();
+
+            //yield break;    
         }
 
         if (feedback.gameOver)
         {
-            chatPanel.Lose();
-            gameObject.SetActive(false);
+            m_chatPanel.Lose();
+            //gameObject.SetActive(false);
             GameManager.isTempPause = false;
             GameManager.isBagDone = true;
-            GameManager.lvlPositivity--; //Deduct 1
-            GameManager.UpdateNegativeBar();
+            GameManager.lvl_mood--; //Deduct 1
+            GameManager.UpdateMoodBar();
             GameManager.CheckifGameOver();
 
-            yield break;
+            m_chatPanel.GetComponent<Popup>().Close();
+
+            //yield break;
         }
+
+        yield return 0;
     }
 
     Response GetCurrentResponse(ParentResponse parentResponse)
     {
         Response response;
-        response = chatPanel.GetResponseIndex == 1 ? parentResponse.response1 : parentResponse.response2;
+        response = m_chatPanel.GetResponseIndex == 1 ? parentResponse.response1 : parentResponse.response2;
         return response;
     }
 
     void AddPotentialScore()
     {
-        switch (chatPanel.GetResponseIndex) //Obtain Possible Reward for Parent1 Selection
+        switch (m_chatPanel.GetResponseIndex) //Obtain Possible Reward for Parent1 Selection
         {
             case 1:
                 for (int i = 0; i < m_NextResponse.response1.skillsEarned.Length; i++)

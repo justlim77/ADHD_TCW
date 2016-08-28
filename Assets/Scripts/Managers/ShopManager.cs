@@ -98,11 +98,11 @@ public class ShopManager : MonoBehaviour
                 {
                     if(DataManager.ReadIntData(DataManager.totalGem) >= refilPositive) //Check if GEM is sufficient
                     {
-                        if(GameManager.lvlPositivity < GameManager.maxBar)
+                        if(GameManager.lvl_mood < GameManager.maxBar)
                         {
                             DeductGem(refilPositive);
-                            GameManager.lvlPositivity = GameManager.maxBar;
-                            GameManager.UpdateNegativeBar();
+                            GameManager.lvl_mood = GameManager.maxBar;
+                            GameManager.UpdateMoodBar();
                             DisplayResultMessage(true, "Posivity Bar has been refilled!");
                         }
                         else
@@ -128,11 +128,11 @@ public class ShopManager : MonoBehaviour
                 {
                     if (DataManager.ReadIntData(DataManager.totalGem) >= refilCleanliness) //Check if GEM is sufficient
                     {
-                        if (GameManager.lvlCleanliness < GameManager.maxBar)
+                        if (GameManager.lvl_hygiene < GameManager.maxBar)
                         {
                             DeductGem(refilCleanliness);
-                            GameManager.lvlCleanliness = GameManager.maxBar;
-                            GameManager.UpdateMessinessBar();
+                            GameManager.lvl_hygiene = GameManager.maxBar;
+                            GameManager.UpdateHygieneBar();
                             DisplayResultMessage(true, "Cleanliness Bar has been refilled!");
                         }
                         else
@@ -158,11 +158,11 @@ public class ShopManager : MonoBehaviour
                 {
                     if (DataManager.ReadIntData(DataManager.totalGem) >= refilStamina) //Check if GEM is sufficient
                     {
-                        if (GameManager.lvlStamina < GameManager.maxStamina)
+                        if (GameManager.lvl_stamina < GameManager.maxStamina)
                         {
                             DeductGem(refilStamina);
-                            GameManager.lvlStamina = GameManager.maxStamina;
-                            GameManager.UpdateStaminaBar();
+                            GameManager.lvl_stamina = GameManager.maxStamina;
+                            GameManager.UpdateVitalityBar();
                             DisplayResultMessage(true, "Stamina has been refilled!");
                         }
                         else

@@ -53,8 +53,8 @@ public class Clock : MonoBehaviour
             {
                 tempHour = 0;
                 count++;
-                GameManager.lvlStamina--;
-                GameManager.UpdateStaminaBar();
+                GameManager.lvl_stamina--;
+                GameManager.UpdateVitalityBar();
             }
             else
                 tempHour = (GameManager.gameHour + hour - 10) - count;

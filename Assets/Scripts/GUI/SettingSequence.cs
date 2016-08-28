@@ -3,7 +3,6 @@ using System.Collections;
 
 public class SettingSequence : MonoBehaviour
 {
-
     public Vector2 startPos;
 
     RectTransform m_Rect;

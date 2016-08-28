@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using System;
+using DG.Tweening;
 
 public class ChatPanel : MonoBehaviour
 {
@@ -31,6 +33,19 @@ public class ChatPanel : MonoBehaviour
     int responseIndex = 0;
     bool proceed = false;
 
+    Graphic m_graphic;
+    Graphic graphic
+    {
+        get
+        {
+            if (m_graphic == null)
+            {
+                m_graphic = GetComponent<Graphic>();
+            }
+            return m_graphic;
+        }
+    }
+
     void Awake()
     {
         m_ParentTextTyper1 = parentText1.GetComponent<TextTyper>();
@@ -45,7 +60,6 @@ public class ChatPanel : MonoBehaviour
     void Start ()
     {
         Initialize();
-        gameObject.SetActive(false);
 	}
 
     public void Initialize()
@@ -63,6 +77,8 @@ public class ChatPanel : MonoBehaviour
         childIcon.SetActive(false);
 
         gameObject.SetActive(true);
+
+        graphic.DOColor(activeColor, 0.5f).SetEase(Ease.InFlash);
     }
 
     public IEnumerator TypeSynopsis(string message)

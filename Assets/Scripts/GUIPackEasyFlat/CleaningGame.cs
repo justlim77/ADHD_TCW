@@ -53,7 +53,7 @@ public class CleaningGame : MonoBehaviour
             min = sr.bounds.min;
             max = sr.bounds.max;
 
-            if (GameManager.lvlStamina <= 0)
+            if (GameManager.lvl_stamina <= 0)
                 dustSpawn = 40;
             else
                 dustSpawn = 20;
@@ -77,10 +77,7 @@ public class CleaningGame : MonoBehaviour
             DustCleared();
 
             GameManager.SetInteractable(false);
-            GameManager.isCleanShelfDone = true;
-            shelfPanel_.OpenSettings(true); // Show dust cleaned
-
-            
+            GameManager.isCleanShelfDone = true;            
 
             if((timer < 5) && (DataManager.ReadIntData(DataManager.acTwo) == 0))
                 DataManager.StoreIntData(DataManager.acTwo, 1);

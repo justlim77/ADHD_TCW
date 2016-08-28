@@ -10,6 +10,8 @@ public class ShelfCleaning : MonoBehaviour
     public SpriteRenderer bgShelf, goShelf;
     public GameObject cleaningGamePrefab;
 
+    GameObject m_cleaningGame;
+
     BoxCollider2D m_boxCollider;
     BoxCollider2D boxCollider
     {
@@ -42,9 +44,11 @@ public class ShelfCleaning : MonoBehaviour
     }
     protected void CleaningGameCompleted()
     {
+        Destroy(m_cleaningGame);
+
         if (OnCleaningGameCompleted != null)
         {
-            OnCleaningGameCompleted("Shelf Cleaning game completed");
+            OnCleaningGameCompleted("Dust Cleared");
         }
     }
 
@@ -107,7 +111,7 @@ public class ShelfCleaning : MonoBehaviour
 
     public void OpenGame()
     {
-        GameObject cleaningGame = Instantiate(cleaningGamePrefab);
+        m_cleaningGame = Instantiate(cleaningGamePrefab);
         CleaningGame.OnDustCleared += CleaningGame_OnDustCleared;
         CleaningGameOpened();
     }
@@ -115,5 +119,6 @@ public class ShelfCleaning : MonoBehaviour
     private void CleaningGame_OnDustCleared(string obj)
     {
         CleaningGameCompleted();
+        CleaningGame.OnDustCleared -= CleaningGame_OnDustCleared;
     }
 }
