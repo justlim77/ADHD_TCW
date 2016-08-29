@@ -255,7 +255,7 @@ public class Scenario : MonoBehaviour
     {
         if (feedback.done)
         {
-            m_chatPanel.Done();
+            //m_chatPanel.Done();
             //gameObject.SetActive(false);
             GameManager.isTempPause = false;
             GameManager.isBagDone = true;
@@ -266,12 +266,12 @@ public class Scenario : MonoBehaviour
 
             m_chatPanel.GetComponent<Popup>().Close();
 
-            //yield break;    
+            yield break;    
         }
 
         if (feedback.gameOver)
         {
-            m_chatPanel.Lose();
+            //m_chatPanel.Lose();
             //gameObject.SetActive(false);
             GameManager.isTempPause = false;
             GameManager.isBagDone = true;
@@ -281,7 +281,7 @@ public class Scenario : MonoBehaviour
 
             m_chatPanel.GetComponent<Popup>().Close();
 
-            //yield break;
+            yield break;
         }
 
         yield return 0;

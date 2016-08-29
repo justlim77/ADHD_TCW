@@ -78,7 +78,7 @@ public class ChatPanel : MonoBehaviour
 
         gameObject.SetActive(true);
 
-        graphic.DOColor(activeColor, 0.5f).SetEase(Ease.InFlash);
+        //graphic.DOColor(activeColor, 0.5f).SetEase(Ease.InFlash);
     }
 
     public IEnumerator TypeSynopsis(string message)
