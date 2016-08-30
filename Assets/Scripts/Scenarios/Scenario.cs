@@ -63,6 +63,21 @@ public class Scenario : MonoBehaviour
             bcObj.enabled = isActive;
     }
 
+    void OnEnable()
+    {
+        GameManager.OnGameStateChanged += GameManager_OnGameStateChanged;
+    }
+
+    private void GameManager_OnGameStateChanged(object sender, GameState e)
+    {
+        switch(e)
+        {
+            case GameState.Playing:
+                bcObj.enabled = true;
+                break;
+        }
+    }
+
     void Start ()
     {
         Initialize();
@@ -92,6 +107,11 @@ public class Scenario : MonoBehaviour
 
     public void BeginScenario()
     {
+        if (!bcObj.enabled)
+            return;
+
+        SetBoxCollider(false);
+
         if (!GameManager.isTempPause)
         {
             GameManager.isTempPause = true;
@@ -112,6 +132,8 @@ public class Scenario : MonoBehaviour
         m_chatPanel.Initialize();
 
         ScenarioOpened();
+
+        yield return new WaitForEndOfFrame();
 
         // Show synopsis
         yield return m_chatPanel.TypeSynopsis(synopsis);

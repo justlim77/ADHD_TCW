@@ -59,14 +59,10 @@ public class TextTyper : MonoBehaviour
                 AudioManager.Instance.RandomizeSFX(typeSound1, typeSound2);
             if (_skip)
             {
-                yield return 0;
-                //text.text = message;
-                //yield break;
+                yield return new WaitForEndOfFrame();
             }
             else
                 yield return m_LetterPause;
-            //yield return 0;
-            //yield return m_LetterPause;
         }
 
         _skip = true;

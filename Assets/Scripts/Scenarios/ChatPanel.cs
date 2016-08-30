@@ -65,6 +65,7 @@ public class ChatPanel : MonoBehaviour
     public void Initialize()
     {
         synopsisText.Clear();
+
         parentText1.text = string.Empty;
         parentText2.text = string.Empty;
         childText.text = string.Empty;
@@ -103,15 +104,19 @@ public class ChatPanel : MonoBehaviour
         parentResponse1.SetActive(false);
         parentResponse2.SetActive(false);
 
+        m_ParentResponseBtn1.interactable = false;
+        m_ParentResponseBtn2.interactable = false;
+
         m_ParentIconImg.color = activeColor;
         m_ChildIconImg.color = inactiveColor;
 
         parentResponse1.SetActive(true);
         yield return m_ParentTextTyper1.RunTypeText(first);
-        m_ParentResponseBtn1.interactable = true;
 
         parentResponse2.SetActive(true);
         yield return m_ParentTextTyper2.RunTypeText(second);
+
+        m_ParentResponseBtn1.interactable = true;
         m_ParentResponseBtn2.interactable = true;
     }
 

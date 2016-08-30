@@ -111,6 +111,7 @@ public class ShelfCleaning : MonoBehaviour
 
     public void OpenGame()
     {
+        boxCollider.enabled = false;
         m_cleaningGame = Instantiate(cleaningGamePrefab);
         CleaningGame.OnDustCleared += CleaningGame_OnDustCleared;
         CleaningGameOpened();
