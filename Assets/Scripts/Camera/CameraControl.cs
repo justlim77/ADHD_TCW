@@ -42,6 +42,12 @@ public class CameraControl : MonoBehaviour
     {
         GameManager.OnGameStateChanged += GameManager_OnGameStateChanged;
         ShelfCleaning.OnCleaningGameOpen += ShelfCleaning_OnCleaningGameOpen;
+        ShelfCleaning.OnCleaningGameCompleted += ShelfCleaning_OnCleaningGameCompleted;
+    }
+
+    private void ShelfCleaning_OnCleaningGameCompleted(string obj)
+    {
+        m_allowTouchPanning = true;
     }
 
     private void ShelfCleaning_OnCleaningGameOpen(string obj)
@@ -53,6 +59,7 @@ public class CameraControl : MonoBehaviour
     {
         GameManager.OnGameStateChanged -= GameManager_OnGameStateChanged;
         ShelfCleaning.OnCleaningGameOpen -= ShelfCleaning_OnCleaningGameOpen;
+        ShelfCleaning.OnCleaningGameCompleted -= ShelfCleaning_OnCleaningGameCompleted;
     }
 
     private void GameManager_OnGameStateChanged(object sender, GameState e)

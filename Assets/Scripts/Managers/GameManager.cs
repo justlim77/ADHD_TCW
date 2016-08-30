@@ -77,7 +77,7 @@ public class GameManager : Singleton<GameManager>
 
     private void ShelfCleaning_OnCleaningGameOpen(string obj)
     {
-
+        Camera.main.GetComponent<CameraControl>().AllowPan(false);
     }
 
     private void ShelfCleaning_OnCleaningGameCompleted(string obj)

@@ -22,6 +22,7 @@ public class UserInterface : MonoBehaviour
     public GameObject bottomBar;
 
     public GameObject notificationPrefab;
+    public GameObject yesNoPrefab;
     public GameObject arrivalPrefab;
     public GameObject chatPanelPrefab;
 
@@ -74,6 +75,14 @@ public class UserInterface : MonoBehaviour
         GameManager.OnGameStateChanged += GameManager_OnGameStateChanged;
         ShelfCleaning.OnCleaningGameOpen += ShelfCleaning_OnCleaningGameOpen;
         ShelfCleaning.OnCleaningGameCompleted += ShelfCleaning_OnCleaningGameCompleted;
+        SleepButton.OnBedPressed += SleepButton_OnBedPressed;
+    }
+
+    private void SleepButton_OnBedPressed(string obj)
+    {
+        ShowYesNoPopup("Go to Sleep?",
+                        "",
+                        StartSequence);
     }
 
     private void ShelfCleaning_OnCleaningGameOpen(string obj)
@@ -94,6 +103,7 @@ public class UserInterface : MonoBehaviour
         GameManager.OnGameStateChanged -= GameManager_OnGameStateChanged;
         ShelfCleaning.OnCleaningGameOpen -= ShelfCleaning_OnCleaningGameOpen;
         ShelfCleaning.OnCleaningGameCompleted -= ShelfCleaning_OnCleaningGameCompleted;
+        SleepButton.OnBedPressed -= SleepButton_OnBedPressed;
     }
 
     private void GameManager_OnGameStateChanged(object sender, GameState e)
@@ -149,7 +159,9 @@ public class UserInterface : MonoBehaviour
     public void StartGame()
     {
         //GameManager.Instance.PlayGame();
+        GameManager.Instance.IncreaseDayScene();
         GameTimer.Instance.DeductLife();
+        StartSequence();
     }
 
     void ShowNoficationPopup(string headline, string info, params Action[] actions)
@@ -167,6 +179,24 @@ public class UserInterface : MonoBehaviour
         }
 
         notify.confirmButton.onClick.AddListener(() => { notification.GetComponent<Popup>().Close(); });
+    }
+
+    void ShowYesNoPopup(string headline, string info, params Action[] actions)
+    {
+        popupOpener.popupPrefab = yesNoPrefab;
+        popupOpener.initialScale = Vector3.zero;
+        GameObject notification = popupOpener.GetOpenPopup();
+        Notify notify = notification.GetComponent<Notify>();
+        notify.headlineText.text = headline;
+        notify.infoText.text = info;
+        for (int i = 0; i < actions.Length; i++)
+        {
+            int n = i;
+            notify.confirmButton.onClick.AddListener(() => { actions[n](); });
+        }
+
+        notify.confirmButton.onClick.AddListener(() => { notification.GetComponent<Popup>().Close(); });
+        notify.cancelButton.onClick.AddListener(() => { notification.GetComponent<Popup>().Close(); });
     }
 
     IEnumerator ShowArrivalPopup(string headline, string info, params Action[] actions)

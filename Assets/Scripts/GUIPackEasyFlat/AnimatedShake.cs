@@ -13,6 +13,7 @@ public class AnimatedShake : MonoBehaviour
     void Start()
     {
         originalScale = transform.localScale;
+        print(gameObject.name + originalScale);
     }
 
     public void StartAnimation()
