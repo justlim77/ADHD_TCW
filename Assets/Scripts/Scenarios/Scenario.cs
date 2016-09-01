@@ -279,6 +279,10 @@ public class Scenario : MonoBehaviour
         {
             //m_chatPanel.Done();
             //gameObject.SetActive(false);
+
+            // Force stop typing
+            
+
             GameManager.isTempPause = false;
             GameManager.isBagDone = true;
 
@@ -297,9 +301,8 @@ public class Scenario : MonoBehaviour
             //gameObject.SetActive(false);
             GameManager.isTempPause = false;
             GameManager.isBagDone = true;
-            GameManager.lvl_mood--; //Deduct 1
-            GameManager.UpdateMoodBar();
-            GameManager.CheckifGameOver();
+            GameManager.Instance.mood--; //Deduct 1
+            GameManager.Instance.CheckifGameOver();
 
             m_chatPanel.GetComponent<Popup>().Close();
 

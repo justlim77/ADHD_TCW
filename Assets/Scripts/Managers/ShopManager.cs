@@ -1,24 +1,25 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
-
+using System;
 
 //[SHOP ITEM ID]
-//0 - REFIL GEM
-//1 - REFIL POSITIVITY
-//2 - REFIL CLEANLINESS
-//3 - REFIL STAMINA
-
+//0 - REFIL ENERGY
+//1 - REFIL MOOD
+//2 - REFIL HYGIENE
+//3 - REFIL VITALITY
 
 public class ShopManager : MonoBehaviour
 {
-    //Shop Price (Set from Unity)
-    public int refilGem = 100;
-    public int refilPositive = 100;
-    public int refilCleanliness = 100;
-    public int refilStamina = 100;
+    public static event Action<string> OnItemPurchased;
 
-    public Text[] shopPrice;
+    //Shop Price (Set from Unity)
+    public int refillEnergyCost = 100;
+    public int refillMoodCost = 100;
+    public int refillHygieneCost = 100;
+    public int refillVitalityCost = 100;
+
+    public Text[] priceLabels;
     public Text resultHeader;
     public Text resultMsg;
     public SettingSequence purchaseResult;
@@ -31,38 +32,30 @@ public class ShopManager : MonoBehaviour
 
     void Start()
     {
-        shopPrice[0].text = refilGem.ToString();
-        shopPrice[1].text = refilPositive.ToString();
-        shopPrice[2].text = refilCleanliness.ToString();
-        shopPrice[3].text = refilStamina.ToString();
+        priceLabels[0].text = refillEnergyCost.ToString();
+        priceLabels[1].text = refillMoodCost.ToString();
+        priceLabels[2].text = refillHygieneCost.ToString();
+        priceLabels[3].text = refillVitalityCost.ToString();
+    }
+
+    protected virtual void ItemPurchased(string result)
+    {
+        if (OnItemPurchased != null)
+            OnItemPurchased(result);
     }
 
     void DisplayResultMessage(bool Success, string Message)
     {
-        ButtonAndScroll(false);
+        string result = "";
 
-        if (!Success)
-            resultHeader.text = "Purchase Failed!";
-        else
-            resultHeader.text = "Purchase Success!";
+        result = Success ? "Purchase Success!" : "Purchase Failed";
 
-        resultMsg.text = Message;
-        purchaseResult.OpenSettings(true);
-    }
-
-    public void ButtonAndScroll(bool isEnable)
-    {
-        for (int i = 0; i < buyButton.Length; i++)
-            buyButton[i].enabled = isEnable;
-
-        shopClose.enabled = isEnable;
-        shopScroll.enabled = isEnable;
+        ItemPurchased(result);
     }
 
     void DeductGem(int Amount)
     {
         DataManager.StoreIntData(DataManager.totalGem, (DataManager.ReadIntData(DataManager.totalGem) - Amount));
-        currencyPanel.ObtainTotalGem();
 
         if (DataManager.ReadIntData(DataManager.acThree) == 0)
             DataManager.StoreIntData(DataManager.acThree, 1);
@@ -75,46 +68,45 @@ public class ShopManager : MonoBehaviour
             case 0: //Refil GEM
                 if(DataManager.ReadIntData("LIFE") < 3)
                 {
-                    if(DataManager.ReadIntData(DataManager.totalGem) >= refilGem) //Check if GEM is sufficient
+                    if(DataManager.ReadIntData(DataManager.totalGem) >= refillEnergyCost) //Check if GEM is sufficient
                     {
-                        DeductGem(refilGem);
+                        DeductGem(refillEnergyCost);
                         lifeTimer.ResetLife();
-                        DisplayResultMessage(true, "Life has been refilled!");
+                        DisplayResultMessage(true, "Energy refilled!");
                     }
                     else
                     {
                         //Display Error (Insufficient GEM)
-                        DisplayResultMessage(false, "Insufficient GEM!");
+                        DisplayResultMessage(false, "Insufficient Gems!");
                     }
                 }
                 else
                 {
                     //Display Error (Game hasn't started)
-                    DisplayResultMessage(false, "You have full lifes!");
+                    DisplayResultMessage(false, "Energy full!");
                 }
                 break;
             case 1: //Refil Posivity
                 if (GameManager.hasDayStarted) //Check if Game have started
                 {
-                    if(DataManager.ReadIntData(DataManager.totalGem) >= refilPositive) //Check if GEM is sufficient
+                    if(DataManager.ReadIntData(DataManager.totalGem) >= refillMoodCost) //Check if GEM is sufficient
                     {
-                        if(GameManager.lvl_mood < GameManager.maxBar)
+                        if(GameManager.Instance.mood < GameManager.maxBar)
                         {
-                            DeductGem(refilPositive);
-                            GameManager.lvl_mood = GameManager.maxBar;
-                            GameManager.UpdateMoodBar();
-                            DisplayResultMessage(true, "Posivity Bar has been refilled!");
+                            DeductGem(refillMoodCost);
+                            GameManager.Instance.mood = GameManager.maxBar;
+                            DisplayResultMessage(true, "Mood refilled!");
                         }
                         else
                         {
                             //Display Error (Bar is Full)
-                            DisplayResultMessage(false, "Posivity Bar is Full!");
+                            DisplayResultMessage(false, "Mood full!");
                         }
                     }
                     else
                     {
                         //Display Error (Insufficient GEM)
-                        DisplayResultMessage(false, "Insufficient GEM!");
+                        DisplayResultMessage(false, "Insufficient Gems!");
                     }
                 }
                 else
@@ -126,25 +118,24 @@ public class ShopManager : MonoBehaviour
             case 2: //Refil Cleanliness
                 if (GameManager.hasDayStarted) //Check if Game have started
                 {
-                    if (DataManager.ReadIntData(DataManager.totalGem) >= refilCleanliness) //Check if GEM is sufficient
+                    if (DataManager.ReadIntData(DataManager.totalGem) >= refillHygieneCost) //Check if GEM is sufficient
                     {
-                        if (GameManager.lvl_hygiene < GameManager.maxBar)
+                        if (GameManager.Instance.hygiene < GameManager.maxBar)
                         {
-                            DeductGem(refilCleanliness);
-                            GameManager.lvl_hygiene = GameManager.maxBar;
-                            GameManager.UpdateHygieneBar();
-                            DisplayResultMessage(true, "Cleanliness Bar has been refilled!");
+                            DeductGem(refillHygieneCost);
+                            GameManager.Instance.hygiene = GameManager.maxBar;
+                            DisplayResultMessage(true, "Hygiene refilled!");
                         }
                         else
                         {
                             //Display Error (Bar is Full)
-                            DisplayResultMessage(false, "Cleanliness Bar is Full!");
+                            DisplayResultMessage(false, "Hygiene full!");
                         }
                     }
                     else
                     {
                         //Display Error (Insufficient GEM)
-                        DisplayResultMessage(false, "Insufficient GEM!");
+                        DisplayResultMessage(false, "Insufficient Gems!");
                     }
                 }
                 else
@@ -156,25 +147,24 @@ public class ShopManager : MonoBehaviour
             case 3: //Refil Stamina
                 if (GameManager.hasDayStarted) //Check if Game have started
                 {
-                    if (DataManager.ReadIntData(DataManager.totalGem) >= refilStamina) //Check if GEM is sufficient
+                    if (DataManager.ReadIntData(DataManager.totalGem) >= refillVitalityCost) //Check if GEM is sufficient
                     {
-                        if (GameManager.lvl_stamina < GameManager.maxStamina)
+                        if (GameManager.Instance.vitality < GameManager.maxStamina)
                         {
-                            DeductGem(refilStamina);
-                            GameManager.lvl_stamina = GameManager.maxStamina;
-                            GameManager.UpdateVitalityBar();
-                            DisplayResultMessage(true, "Stamina has been refilled!");
+                            DeductGem(refillVitalityCost);
+                            GameManager.Instance.vitality = GameManager.maxStamina;
+                            DisplayResultMessage(true, "Vitality refilled!");
                         }
                         else
                         {
                             //Display Error (Bar is Full)
-                            DisplayResultMessage(false, "Stamina is Full!");
+                            DisplayResultMessage(false, "Vitality full!");
                         }
                     }
                     else
                     {
                         //Display Error (Insufficient GEM)
-                        DisplayResultMessage(false, "Insufficient GEM!");
+                        DisplayResultMessage(false, "Insufficient Gems!");
                     }
                 }
                 else

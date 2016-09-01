@@ -1,24 +1,85 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
+using System;
 
 #if UNITY_5_3_OR_NEWER
 using UnityEngine.SceneManagement;
 #endif
 
-public class GameManager : Singleton<GameManager>
+public class GameManager : MonoBehaviour
 {
+    public static GameManager Instance { get; private set; }
+
+    #region Events
     public delegate void GameStateChangedEventHandler(object sender, GameState e);
     public static event GameStateChangedEventHandler OnGameStateChanged;
+
+    public static event Action<int> OnDayValueChanged;
+    public static event Action<float> OnMoodValueChanged;
+    public static event Action<float> OnHygieneValueChanged;
+    public static event Action<float> OnVitalityValueChanged;
+    #endregion
         
     //Is Action Done?
     public static bool isCleanShelfDone = false;
     public static bool isBagDone = false;
 
-    //Current Bar Level - 0 = Game Over
-    public static float lvl_mood = 2;
-    public static float lvl_hygiene = 2; 
-    public static float lvl_stamina = 5; 
+    #region Properties
+    int m_dayScene = 1;
+    public int dayScene
+    {
+        get { return m_dayScene; }
+        set
+        {
+            m_dayScene = value;
+            DayValueChanged();
+        }
+    }
+
+
+    float m_mood = 5f;
+    public float mood
+    {
+        get
+        {
+            return m_mood;
+        }
+        set
+        {
+            m_mood = value;
+            MoodValueChanged();
+        }
+    }
+
+    float m_hygiene = 5f;
+    public float hygiene
+    {
+        get
+        {
+            return m_hygiene;
+        }
+        set
+        {
+            m_hygiene = value;
+            HygieneValueChanged();
+        }
+    }
+
+    float m_vitality = 5f;
+    public float vitality
+    {
+        get
+        {
+            return m_vitality;
+        }
+        set
+        {
+            m_vitality = value;
+            VitalityValueChanged();
+        }
+    }
+    #endregion
 
     //AI Progress Reward
     public static int[] gameReward = { 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -27,26 +88,15 @@ public class GameManager : Singleton<GameManager>
     public static bool isTempPause = false;
     public static bool hasDayStarted = false;
     public static bool isInScenario = false;
-    public static int dayScene = 1;
 
     public static float gameTime = 0;
     public static float gameHour = 0;
 
-    public Button btnPause;
-    public Button btnSettings;
-    public Slider sliNegative;
-    public Slider sliMessiness;
-    public Slider sliTiredness;
     public SettingSequence gameOver;
 
-    public static float maxBar = 2;
-    public static float maxStamina = 5;
+    public static float maxBar = 10;
+    public static float maxStamina = 10;
 
-    static Button btnPause_;
-    static Button btnSettings_;
-    static Slider sliNegative_;
-    static Slider sliMessiness_;
-    static Slider sliTiredness_;
     static SettingSequence gameOver_;
 
     GameState _gameState = GameState.None;
@@ -71,31 +121,18 @@ public class GameManager : Singleton<GameManager>
     {
         CameraControl.OnCameraReached += CameraControl_OnCameraReached;
         SceneManager.sceneLoaded += SceneManager_sceneLoaded;
-        ShelfCleaning.OnCleaningGameCompleted += ShelfCleaning_OnCleaningGameCompleted;
-        ShelfCleaning.OnCleaningGameOpen += ShelfCleaning_OnCleaningGameOpen;
-    }
-
-    private void ShelfCleaning_OnCleaningGameOpen(string obj)
-    {
-        Camera.main.GetComponent<CameraControl>().AllowPan(false);
-    }
-
-    private void ShelfCleaning_OnCleaningGameCompleted(string obj)
-    {
-        Camera.main.GetComponent<CameraControl>().AllowPan(true);
-    }
-
-    private void SceneManager_sceneLoaded(UnityEngine.SceneManagement.Scene arg0, UnityEngine.SceneManagement.LoadSceneMode arg1)
-    {
-        Debug.Log(string.Format("{0} scene loaded in {1} load scene mode", arg0.name, arg1.ToString()));
-        Initialize();
     }
 
     void OnDisable()
     {
         CameraControl.OnCameraReached -= CameraControl_OnCameraReached;
         SceneManager.sceneLoaded -= SceneManager_sceneLoaded;
-        ShelfCleaning.OnCleaningGameCompleted -= ShelfCleaning_OnCleaningGameCompleted;
+    }
+
+    private void SceneManager_sceneLoaded(UnityEngine.SceneManagement.Scene arg0, UnityEngine.SceneManagement.LoadSceneMode arg1)
+    {
+        //Debug.Log(string.Format("{0} scene loaded in {1} load scene mode", arg0.name, arg1.ToString()));
+        Initialize();
     }
 
     private void CameraControl_OnCameraReached(object sender)
@@ -103,19 +140,58 @@ public class GameManager : Singleton<GameManager>
         gameState = GameState.Pregame;
     }
 
+    protected virtual void DayValueChanged()
+    {
+        if (OnDayValueChanged != null)
+            OnDayValueChanged(dayScene);
+
+        Debug.Log(string.Format("Day value changed to {0}", dayScene));
+    }
+
+    protected virtual void MoodValueChanged()
+    {
+        if (OnMoodValueChanged != null)
+            OnMoodValueChanged(mood);
+
+        Debug.Log(string.Format("Mood value changed to {0}", mood));
+    }
+
+    protected virtual void HygieneValueChanged()
+    {
+        if (OnHygieneValueChanged != null)
+            OnHygieneValueChanged(hygiene);
+
+        Debug.Log(string.Format("Hygiene value changed to {0}", hygiene));
+    }
+
+    protected virtual void VitalityValueChanged()
+    {
+        if (OnVitalityValueChanged != null)
+            OnVitalityValueChanged(vitality);
+
+        Debug.Log(string.Format("Vitality value changed to {0}", vitality));
+    }
+
+    void Awake()
+    {
+        if (Instance == null)
+            Instance = this;
+
+        DontDestroyOnLoad(gameObject);
+    }
+
     void OnDestroy()
     {
-        base.OnDestroy();
-
         ResetActionCheck();
         ResetDay();
+
         isTempPause = false;
         isInScenario = false;
         dayScene = 1;
 
-        lvl_mood = 5;
-        lvl_hygiene = 5;
-        lvl_stamina = 5;
+        mood = 5;
+        hygiene = 5;
+        vitality = 5;
 
         for (int i = 0; i < gameReward.Length; i++)
             gameReward[i] = 0;
@@ -139,44 +215,13 @@ public class GameManager : Singleton<GameManager>
         dayScene++;
     }
 
-    void ResetDay()
-    {
-        gameTime = 0;
-        gameHour = 0;
-        hasDayStarted = false;
-    }
-
     void CheckIsActionDone()
     {
         if (!isCleanShelfDone)
-            lvl_hygiene--;
+            hygiene--;
 
         if (!isBagDone)
-            lvl_mood--;
-
-        UpdateHygieneBar();
-        UpdateMoodBar();
-    }
-
-    void Awake()
-    {
-        btnPause_ = btnPause;
-        btnSettings_ = btnSettings;
-        sliNegative_ = sliNegative;
-        sliMessiness_ = sliMessiness;
-        sliTiredness_ = sliTiredness;
-        gameOver_ = gameOver;
-    }
-
-    void Start()
-    {
-
-    }
-
-    bool Initialize()
-    {
-        gameState = GameState.Default;
-        return true;
+            mood--;
     }
 
     void ResetActionCheck()
@@ -185,37 +230,23 @@ public class GameManager : Singleton<GameManager>
         isBagDone = false;
     }
 
-    public static void CheckifGameOver()
+    void ResetDay()
     {
-        if ((lvl_hygiene <= 0) || (lvl_mood <= 0))
+        gameTime = 0;
+        gameHour = 0;
+        hasDayStarted = false;
+    }
+
+    bool Initialize()
+    {
+        gameState = GameState.Default;
+        return true;
+    }
+
+    public void CheckifGameOver()
+    {
+        if ((hygiene <= 0) || (mood <= 0))
             gameOver_.PauseGame(true);
-    }
-
-    public static void UpdateHygieneBar()
-    {
-        sliMessiness_.value = lvl_hygiene / maxBar;
-    }
-
-    public static void UpdateMoodBar()
-    {
-        sliNegative_.value = lvl_mood / maxBar;
-    }
-
-    public static void UpdateVitalityBar()
-    {
-        sliTiredness_.value = lvl_stamina / maxStamina;
-    }
-
-    public static void SetInteractable(bool isInteractable)
-    {
-        //btnPause_.interactable = isInteractable;
-        //btnSettings_.interactable = isInteractable;
-    }
-
-    public void SetInteractableWithoutScript(bool isInteractable)
-    {
-        //btnPause.interactable = isInteractable;
-        //btnSettings.interactable = isInteractable;
     }
 
     public static int CalculateScore(int cat)

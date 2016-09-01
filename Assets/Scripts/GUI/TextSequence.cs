@@ -1,10 +1,13 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
+using System;
 using DG.Tweening;
 
 public class TextSequence : MonoBehaviour
 {
+    public static event Action<string> OnTapClosed;
+
     public TextTyper dayTextTyper;
     public TextTyper messageTextTyper;
     public Graphic closeGraphic;
@@ -49,6 +52,15 @@ public class TextSequence : MonoBehaviour
             closeGraphic.DOColor(Color.black, 1f).SetEase(Ease.Flash).SetLoops(-1, LoopType.Yoyo);  // Pingpong tween between black/white
         }
         else
-            closeGraphic.DOKill();       
+        {
+            TapClosed();
+            closeGraphic.DOKill(true);       
+        }
+    }
+
+    protected virtual void TapClosed()
+    {
+        if (OnTapClosed != null)
+            OnTapClosed("Tapped to skip");
     }
 }

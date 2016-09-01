@@ -3,8 +3,10 @@ using System.Collections;
 using UnityEngine.UI;
 using System;
 
-public class GameTimer : Singleton<GameTimer>
+public class GameTimer : MonoBehaviour
 {
+    public static GameTimer Instance { get; private set; }
+
     DateTime epochStart;
 
     public Text gameLife;
@@ -17,6 +19,14 @@ public class GameTimer : Singleton<GameTimer>
     int timeLeft = 0;
 
     int minutes, seconds;
+
+    void Awake()
+    {
+        if (Instance == null)
+            Instance = this;
+
+        DontDestroyOnLoad(gameObject);
+    }
 
     void Start ()
     {
@@ -47,7 +57,7 @@ public class GameTimer : Singleton<GameTimer>
         else
             gameTimer.gameObject.SetActive(true);
 
-        Debug.Log("INITIALIZED!");
+        //Debug.Log("INITIALIZED!");
     }
 
     public void DeductLife()

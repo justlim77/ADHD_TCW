@@ -13,6 +13,8 @@ using System;
 [Serializable]
 public class InputManager : Singleton<InputManager>
 {
+    public KeyCode resetCurrencyKey = KeyCode.Delete;
+
     // Set to protected to prevent calling constructor
     protected InputManager() { }
 
@@ -26,6 +28,11 @@ public class InputManager : Singleton<InputManager>
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             Quit();
+        }
+
+        if (Input.GetKeyDown(resetCurrencyKey))
+        {
+            DataManager.ResetToDefault();
         }
     }
 

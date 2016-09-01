@@ -1,8 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 public class DataManager : MonoBehaviour
 {
+    public static event Action<int> OnGemValueChanged;
+
     public static string totalGem = "GEM";
     public static string acOne = "AC_2";
     public static string acTwo = "AC_2";
@@ -25,5 +28,18 @@ public class DataManager : MonoBehaviour
     public static void StoreIntData(string data, int value)
     {
         PlayerPrefs.SetInt(data, value);
+    }
+
+    public static void ResetToDefault()
+    {
+        PlayerPrefs.SetInt("GEM", 500);
+        PlayerPrefs.SetInt("LIFE", 3);
+        PlayerPrefs.SetInt("FIRSTLAUNCH", 1);
+    }
+
+    protected virtual void GemValueChanged()
+    {
+        if (OnGemValueChanged != null)
+            OnGemValueChanged(ReadIntData(totalGem));
     }
 }

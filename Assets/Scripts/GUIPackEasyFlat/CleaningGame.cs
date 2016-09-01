@@ -7,13 +7,13 @@ public class CleaningGame : MonoBehaviour
 {
     public static event Action<string> OnDustCleared;
 
-    public SettingSequence shelfPanel;
     public Transform dustPrefab;
-
     static Transform dirtParent;
-    static SettingSequence shelfPanel_;
 
-    public float scale;
+    public float xBorderPercentage = 0.8f;
+    public float yBorderPercentage = 0.8f;
+
+    public float dustScale;
     static float timer;
 
     bool isLoadDone = false;
@@ -26,7 +26,6 @@ public class CleaningGame : MonoBehaviour
     void Awake ()
     {
         dirtParent = transform;
-        shelfPanel_ = shelfPanel;
     }
 
     void Start()
@@ -52,17 +51,22 @@ public class CleaningGame : MonoBehaviour
             sr = GetComponent<SpriteRenderer>();
             min = sr.bounds.min;
             max = sr.bounds.max;
+            float width = sr.bounds.size.x;
+            float height = sr.bounds.size.y;
 
-            if (GameManager.lvl_stamina <= 0)
+            if (GameManager.Instance.vitality <= 0)
                 dustSpawn = 40;
             else
                 dustSpawn = 20;
 
             for (int i = 0; i < dustSpawn; i++)
             {
-                dirt = Instantiate(dustPrefab, new Vector2(UnityEngine.Random.Range(min.x, max.x), UnityEngine.Random.Range(min.y, max.y)), Quaternion.identity) as Transform;
+                dirt = Instantiate(dustPrefab, new Vector2(
+                    UnityEngine.Random.Range(min.x + (width * (1.0f - xBorderPercentage)) , max.x - (width * (1.0f - xBorderPercentage))), 
+                    UnityEngine.Random.Range(min.y + (height * (1.0f - yBorderPercentage)), max.y - (height * (1.0f - yBorderPercentage)))), 
+                    Quaternion.identity) as Transform;
                 dirt.SetParent(transform);
-                dirt.localScale = new Vector2(scale, scale);
+                dirt.localScale = new Vector2(dustScale, dustScale);
             }
 
             timer = 0;
@@ -72,11 +76,12 @@ public class CleaningGame : MonoBehaviour
 
     public static void DirtNumber()
     {
+        Debug.Log(string.Format("{0} dust left", dirtParent.childCount));
+
         if(dirtParent.childCount <= 1)
         {
             DustCleared();
 
-            GameManager.SetInteractable(false);
             GameManager.isCleanShelfDone = true;            
 
             if((timer < 5) && (DataManager.ReadIntData(DataManager.acTwo) == 0))

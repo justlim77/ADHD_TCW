@@ -80,6 +80,11 @@ public class TextTyper : MonoBehaviour
         _skip = true;
     }
 
+    public void StopTyping()
+    {
+        StopAllCoroutines();
+    }
+
     public void FadeText(float fadeDuration = 1.0f)
     {
         text.CrossFadeAlpha(0.0f, fadeDuration, false);

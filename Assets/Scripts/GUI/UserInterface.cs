@@ -25,6 +25,7 @@ public class UserInterface : MonoBehaviour
     public GameObject yesNoPrefab;
     public GameObject arrivalPrefab;
     public GameObject chatPanelPrefab;
+    public GameObject resultPrefab;
 
     public GameObject[] gameplayElements;
 
@@ -78,16 +79,19 @@ public class UserInterface : MonoBehaviour
         SleepButton.OnBedPressed += SleepButton_OnBedPressed;
     }
 
+
     private void SleepButton_OnBedPressed(string obj)
     {
         ShowYesNoPopup("Go to Sleep?",
                         "",
-                        StartSequence);
+                        false,
+                        StartGame);
     }
 
     private void ShelfCleaning_OnCleaningGameOpen(string obj)
     {
         //topBar.GetComponent<AnimatedSlide>().SlideOut();
+        EnableColliders(false);
         Debug.Log(obj);
     }
 
@@ -100,6 +104,7 @@ public class UserInterface : MonoBehaviour
     void OnDisable()
     {
         editButton.onClick.RemoveAllListeners();
+
         GameManager.OnGameStateChanged -= GameManager_OnGameStateChanged;
         ShelfCleaning.OnCleaningGameOpen -= ShelfCleaning_OnCleaningGameOpen;
         ShelfCleaning.OnCleaningGameCompleted -= ShelfCleaning_OnCleaningGameCompleted;
@@ -121,7 +126,6 @@ public class UserInterface : MonoBehaviour
                 startButton.GetComponent<AnimatedSlide>().SlideIn();
                 editButton.GetComponent<AnimatedSlide>().SlideIn();
                 settingsButton.GetComponent<AnimatedSlide>().SlideIn();
-                topBar.GetComponent<CurrencyBar>().UpdateGems(DataManager.ReadIntData(DataManager.totalGem));
                 topBar.GetComponent<AnimatedSlide>().SlideIn();
                 break;
             case GameState.Playing:
@@ -161,11 +165,14 @@ public class UserInterface : MonoBehaviour
         //GameManager.Instance.PlayGame();
         GameManager.Instance.IncreaseDayScene();
         GameTimer.Instance.DeductLife();
+        //GameManager.Instance.PlayGame();
         StartSequence();
     }
 
-    void ShowNoficationPopup(string headline, string info, params Action[] actions)
+    void ShowNoficationPopup(string headline, string info, bool enableCollidersOnConfirm = true, params Action[] actions)
     {
+        EnableColliders(false); // Disable box collider button raycast
+
         popupOpener.popupPrefab = notificationPrefab;
         popupOpener.initialScale = Vector3.zero;
         GameObject notification = popupOpener.GetOpenPopup();
@@ -179,10 +186,15 @@ public class UserInterface : MonoBehaviour
         }
 
         notify.confirmButton.onClick.AddListener(() => { notification.GetComponent<Popup>().Close(); });
+
+        if(enableCollidersOnConfirm)
+            notify.confirmButton.onClick.AddListener(() => { EnableColliders(true); });
     }
 
-    void ShowYesNoPopup(string headline, string info, params Action[] actions)
+    void ShowYesNoPopup(string headline, string info, bool enableCollidersOnConfirm = true, params Action[] actions)
     {
+        EnableColliders(false); // Disable box collider button raycast
+
         popupOpener.popupPrefab = yesNoPrefab;
         popupOpener.initialScale = Vector3.zero;
         GameObject notification = popupOpener.GetOpenPopup();
@@ -197,6 +209,7 @@ public class UserInterface : MonoBehaviour
 
         notify.confirmButton.onClick.AddListener(() => { notification.GetComponent<Popup>().Close(); });
         notify.cancelButton.onClick.AddListener(() => { notification.GetComponent<Popup>().Close(); });
+        notify.cancelButton.onClick.AddListener(() => { EnableColliders(true); });
     }
 
     IEnumerator ShowArrivalPopup(string headline, string info, params Action[] actions)
@@ -216,9 +229,28 @@ public class UserInterface : MonoBehaviour
 
         sequence.FlashTapToClose();
 
+        TextSequence.OnTapClosed += TextSequence_OnTapClosed;
+
         button.onClick.AddListener(() => arrival.GetComponent<Popup>().Close());
         button.onClick.AddListener(() => sequence.FadeText(0.25f));
         button.onClick.AddListener(() => sequence.FlashTapToClose(false));
+    }
+
+    private void TextSequence_OnTapClosed(string obj)
+    {
+        EnableColliders(true);
+        TextSequence.OnTapClosed -= TextSequence_OnTapClosed;
+    }
+
+    IEnumerator ShowResultPopup()
+    {
+        popupOpener.popupPrefab = resultPrefab;
+        popupOpener.initialScale = Vector3.one;
+        GameObject result = popupOpener.GetOpenPopup();
+
+        ResultsPopup resultPopup = result.GetComponent<ResultsPopup>();
+
+        yield return StartCoroutine(resultPopup.ShowResults());
     }
 
     public void StartSequence()
@@ -228,9 +260,11 @@ public class UserInterface : MonoBehaviour
         topBar.GetComponent<AnimatedSlide>().SlideOut();
         bottomBar.GetComponent<AnimatedSlide>().SlideIn();
 
-        if ((DataManager.ReadIntData("LIFE") > 0) || (GameManager.dayScene > 1))
+        EnableColliders(false);
+
+        if ((DataManager.ReadIntData("LIFE") > 0) || (GameManager.Instance.dayScene > 1))
         {
-            if ((GameManager.dayScene <= 3) && (!GameManager.isTempPause))
+            if ((GameManager.Instance.dayScene <= 3) && (!GameManager.isTempPause))
                 StartCoroutine(ArrivalSequence());
             else
                 StartCoroutine(EndSequence());
@@ -240,16 +274,17 @@ public class UserInterface : MonoBehaviour
             ShowNoficationPopup(
                 "Uh oh!",
                 "Looks like you're out of Energy.",
+                false,
                 startButton.GetComponent<AnimatedSlide>().SlideIn,
                 bottomBar.GetComponent<AnimatedSlide>().SlideOut,
-                topBar.GetComponent<AnimatedSlide>().SlideIn
+                topBar.GetComponent<AnimatedSlide>().SlideIn                
                 );
         }
     }
 
     IEnumerator ArrivalSequence()
     {
-        // Show day number and time arrived at home
+        EnableColliders(false);
 
         // Set gameplay elements active
         foreach (GameObject go in gameplayElements)
@@ -260,7 +295,8 @@ public class UserInterface : MonoBehaviour
         string headline = "";
         string info = "";
 
-        switch (GameManager.dayScene)
+        // Show day number and time arrived at home
+        switch (GameManager.Instance.dayScene)
         {
             case 1:
                 GameManager.gameHour = 5;
@@ -281,16 +317,31 @@ public class UserInterface : MonoBehaviour
 
         yield return StartCoroutine(ShowArrivalPopup(headline, info));
 
-        gotoSleep.enabled = true;
-        gotoShelf.enabled = true;
-        gotoBag.enabled = true;
+        //EnableColliders(true);
 
         gotoSleep.GetComponent<AnimatedShake>().StartAnimation();
         gotoShelf.GetComponent<AnimatedShake>().StartAnimation();
         gotoBag.GetComponent<AnimatedShake>().StartAnimation();
 
         GameManager.hasDayStarted = true;
-        GameManager.CheckifGameOver();
+        GameManager.Instance.CheckifGameOver();
+    }
+
+    public void EnableColliders(bool value)
+    {
+        if (!GameManager.isBagDone)
+            gotoBag.enabled = value;
+        if (!GameManager.isCleanShelfDone)
+            gotoShelf.enabled = value;
+
+        gotoSleep.enabled = value;
+    }
+
+    public void DisableColliders()
+    {
+        gotoBag.enabled = false;
+        gotoShelf.enabled = false;
+        gotoSleep.enabled = false;
     }
 
     IEnumerator EndSequence()
@@ -300,107 +351,10 @@ public class UserInterface : MonoBehaviour
         //    headerText[i].GetComponent<AnimatedSlide>().Initialize();
 
         //Fade in White Canvas
-        gameClearPanel.gameObject.SetActive(true);
 
         //yield return m_gameSequence.RunFadeCanvas(1.0f, 1.0f);
         //yield return new WaitForSeconds(m_gameSequence.fadeDuration);
-
-        //Calculate Results Overall
-        headerText[3].text = "Overall Results:";
-
-        headerText[3].GetComponent<AnimatedSlide>().SlideIn();
-        yield return new WaitForSeconds(0.7f);
-
-        if (GameManager.CalculateScore(0) <= 14) //Bad
-        {
-            //headerText[3].color = new Color32(255, 0, 0, 255);
-            resultText[3].GetComponent<Text>().color = new Color32(255, 0, 0, 255);
-            yield return resultText[3].RunTypeText("Uh oh! You are about to enter a boxing match! You are making a mountain out of a molehill. The grass may be greener on the other side but they may be weeds!");
-        }
-        else if ((GameManager.CalculateScore(0) > 14) && (GameManager.CalculateScore(0) <= 19)) //Mid
-        {
-            //headerText[3].color = new Color32(255, 100, 0, 255);
-            resultText[3].GetComponent<Text>().color = new Color32(255, 100, 0, 255);
-            yield return resultText[3].RunTypeText("Hmmm... You're almost there! Go on, smell the roses! Being mindful is half the battle won.");
-        }
-        else if (GameManager.CalculateScore(0) > 19) //Very Good
-        {
-            //headerText[3].color = new Color32(0, 155, 0, 255);
-            resultText[3].GetComponent<Text>().color = new Color32(0, 155, 0, 255);
-            yield return resultText[3].RunTypeText("Hooray! You hit jackpot! You are on your way to being a cool cucumber! Be proud of yourself!");
-        }
-
-        headerText[0].GetComponent<AnimatedSlide>().SlideIn();
-        yield return new WaitForSeconds(0.7f);
-
-        //Calculate Results E1
-        if (GameManager.CalculateScore(1) <= 2) //Bad
-        {
-            //headerText[0].color = new Color32(255, 0, 0, 255);
-            resultText[0].GetComponent<Text>().color = new Color32(255, 0, 0, 255);
-            yield return resultText[0].RunTypeText("You need to work on these:\n\n-> Managing your own emotions\n-> Acknolwedging your child's every effort");
-        }
-        else if ((GameManager.CalculateScore(1) > 2) && (GameManager.CalculateScore(1) <= 4)) //Mid
-        {
-            //headerText[0].color = new Color32(255, 100, 0, 255);
-            resultText[0].GetComponent<Text>().color = new Color32(255, 100, 0, 255);
-            yield return resultText[0].RunTypeText("You can improve on these:\n\n-> Using appropriate words\n-> Listening to your child's needs\n-> Giving praise and encouragement");
-        }
-        else if (GameManager.CalculateScore(1) > 4) //Very Good
-        {
-            //headerText[0].color = new Color32(0, 155, 0, 255);
-            resultText[0].GetComponent<Text>().color = new Color32(0, 155, 0, 255);
-            yield return resultText[0].RunTypeText("You nailed these:\n\n-> Being firm and not harsh\n-> Acknowledging your child's needs");
-        }
-
-        headerText[1].GetComponent<AnimatedSlide>().SlideIn();
-        yield return new WaitForSeconds(0.7f);
-
-        //Calculate Results E2
-        if (GameManager.CalculateScore(2) <= 5) //Bad
-        {
-            //headerText[1].color = new Color32(255, 0, 0, 255);
-            resultText[1].GetComponent<Text>().color = new Color32(255, 0, 0, 255);
-            yield return resultText[1].RunTypeText("You need to work on these:\n\n-> Getting your child's attention first\n-> Stating tasks requirements\n-> Giving instructions one at a time");
-        }
-        else if ((GameManager.CalculateScore(2) > 5) && (GameManager.CalculateScore(2) <= 7)) //Mid
-        {
-            //headerText[1].color = new Color32(255, 100, 0, 255);
-            resultText[1].GetComponent<Text>().color = new Color32(255, 100, 0, 255);
-            yield return resultText[1].RunTypeText("You can improve on these:\n\n-> Getting your child's attention first\n-> Stating tasks requirements\n-> Keeping instructions short");
-        }
-        else if (GameManager.CalculateScore(2) > 7) //Very Good
-        {
-            //headerText[1].color = new Color32(0, 155, 0, 255);
-            resultText[1].GetComponent<Text>().color = new Color32(0, 155, 0, 255);
-            yield return resultText[1].RunTypeText("You nailed these:\n\n-> Getting your child's attention first\n-> Stating tasks requirements\n-> Checking for understanding");
-        }
-
-        headerText[2].GetComponent<AnimatedSlide>().SlideIn();
-        yield return new WaitForSeconds(0.7f);
-
-        //Calculate Results E3
-        if (GameManager.CalculateScore(3) <= 5) //Bad
-        {
-            //headerText[2].color = new Color32(255, 0, 0, 255);
-            resultText[2].GetComponent<Text>().color = new Color32(255, 0, 0, 255);
-            yield return resultText[2].RunTypeText("You need to work on these:\n\n-> Ignoring minor misbehavior\n-> Following through with consequences");
-        }
-        else if ((GameManager.CalculateScore(3) > 5) && (GameManager.CalculateScore(3) <= 7)) //Mid
-        {
-            //headerText[2].color = new Color32(255, 100, 0, 255);
-            resultText[2].GetComponent<Text>().color = new Color32(255, 100, 0, 255);
-            yield return resultText[2].RunTypeText("You can improve on these:\n\n-> Stating expectations and consequences clearly\n-> Following through with consequences");
-        }
-        else if (GameManager.CalculateScore(3) > 7) //Very Good
-        {
-            //headerText[2].color = new Color32(0, 155, 0, 255);
-            resultText[2].GetComponent<Text>().color = new Color32(0, 155, 0, 255);
-            yield return resultText[2].RunTypeText("You nailed these:\n\n-> Being flexible with child's request\n-> Following through with consequences");
-        }
-
-        yield return new WaitForSeconds(0.1f);
-        btnHome.SetActive(true);
+        yield return StartCoroutine(ShowResultPopup());
     }
 
     public void SetMode(Mode mode)

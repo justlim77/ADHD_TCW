@@ -53,8 +53,7 @@ public class Clock : MonoBehaviour
             {
                 tempHour = 0;
                 count++;
-                GameManager.lvl_stamina--;
-                GameManager.UpdateVitalityBar();
+                GameManager.Instance.vitality--;
             }
             else
                 tempHour = (GameManager.gameHour + hour - 10) - count;
@@ -67,7 +66,6 @@ public class Clock : MonoBehaviour
                 gamePanel.ResetForNextScene();
                 gameManager.IncreaseDayScene();
                 //gamePanel.StartSequence();
-                gameManager.SetInteractableWithoutScript(true);
                 ResetClockCount();
             }
 

@@ -4,10 +4,20 @@ using UnityEngine.UI;
 
 public class CurrencyBar : MonoBehaviour
 {
-    public Text gemLabel;
+    public Text gemText;
 
-    public void UpdateGems(int value)
+    void OnEnable()
     {
-        gemLabel.text = value.ToString();
+        DataManager.OnGemValueChanged += DataManager_OnGemValueChanged;
+    }
+
+    void OnDisable()
+    {
+        DataManager.OnGemValueChanged -= DataManager_OnGemValueChanged;
+    }
+
+    private void DataManager_OnGemValueChanged(int obj)
+    {
+        gemText.text = obj.ToString();
     }
 }
