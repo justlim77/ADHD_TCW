@@ -12,6 +12,7 @@ using System;
 public class ShopManager : MonoBehaviour
 {
     public static event Action<string> OnItemPurchased;
+    public static event Action<string> OnShopClosed;
 
     //Shop Price (Set from Unity)
     public int refillEnergyCost = 100;
@@ -20,22 +21,34 @@ public class ShopManager : MonoBehaviour
     public int refillVitalityCost = 100;
 
     public Text[] priceLabels;
-    public Text resultHeader;
-    public Text resultMsg;
-    public SettingSequence purchaseResult;
-    public CurrencySequence currencyPanel;
-    public GameTimer lifeTimer;
+    public TintedButton[] buyButtons;
 
-    public ScrollRect shopScroll;
-    public Button shopClose;
-    public Button[] buyButton;
+    public AnimatedButton closeButton;
 
-    void Start()
+    void OnEnable()
     {
         priceLabels[0].text = refillEnergyCost.ToString();
         priceLabels[1].text = refillMoodCost.ToString();
         priceLabels[2].text = refillHygieneCost.ToString();
         priceLabels[3].text = refillVitalityCost.ToString();
+
+        for (int i = 0; i < buyButtons.Length; i++)
+        {
+            int n = i;
+            buyButtons[n].onClick.AddListener(() => AttemptPurchase(n));
+        }
+
+        closeButton.onClick.AddListener(() => ShopClosed());
+    }
+
+    void OnDisable()
+    {
+        for (int i = 0; i < buyButtons.Length; i++)
+        {
+            buyButtons[i].onClick.RemoveAllListeners();
+        }
+
+        closeButton.onClick.RemoveAllListeners();
     }
 
     protected virtual void ItemPurchased(string result)
@@ -44,13 +57,19 @@ public class ShopManager : MonoBehaviour
             OnItemPurchased(result);
     }
 
-    void DisplayResultMessage(bool Success, string Message)
+    protected virtual void ShopClosed()
+    {
+        if (OnShopClosed != null)
+            OnShopClosed("Shop closed");
+    }
+
+    void DisplayResultMessage(bool success, string message)
     {
         string result = "";
 
-        result = Success ? "Purchase Success!" : "Purchase Failed";
+        result = success ? "Purchase Success!" : "Purchase Failed";
 
-        ItemPurchased(result);
+        ItemPurchased(message);
     }
 
     void DeductGem(int Amount)
@@ -71,7 +90,7 @@ public class ShopManager : MonoBehaviour
                     if(DataManager.ReadIntData(DataManager.totalGem) >= refillEnergyCost) //Check if GEM is sufficient
                     {
                         DeductGem(refillEnergyCost);
-                        lifeTimer.ResetLife();
+                        GameTimer.Instance.ResetLife();
                         DisplayResultMessage(true, "Energy refilled!");
                     }
                     else

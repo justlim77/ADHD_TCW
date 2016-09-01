@@ -73,12 +73,33 @@ public class UserInterface : MonoBehaviour
     {
         editButton.onClick.AddListener(() => ToggleMode());
 
+        TopBar.OnShopButtonClicked += TopBar_OnShopButtonClicked;
         GameManager.OnGameStateChanged += GameManager_OnGameStateChanged;
         ShelfCleaning.OnCleaningGameOpen += ShelfCleaning_OnCleaningGameOpen;
         ShelfCleaning.OnCleaningGameCompleted += ShelfCleaning_OnCleaningGameCompleted;
         SleepButton.OnBedPressed += SleepButton_OnBedPressed;
     }
 
+    private void TopBar_OnShopButtonClicked(string obj)
+    {
+        ShopManager.OnItemPurchased += ShopManager_OnItemPurchased;
+        ShopManager.OnShopClosed += ShopManager_OnShopClosed;
+
+        EnableColliders(false);
+    }
+
+    private void ShopManager_OnShopClosed(string obj)
+    {
+        ShopManager.OnItemPurchased -= ShopManager_OnItemPurchased;
+
+        if (GameManager.hasDayStarted)
+            EnableColliders(true);
+    }
+
+    private void ShopManager_OnItemPurchased(string obj)
+    {
+        ShowNoficationPopup(obj, "", false);
+    }
 
     private void SleepButton_OnBedPressed(string obj)
     {
@@ -105,6 +126,7 @@ public class UserInterface : MonoBehaviour
     {
         editButton.onClick.RemoveAllListeners();
 
+        TopBar.OnShopButtonClicked -= TopBar_OnShopButtonClicked;
         GameManager.OnGameStateChanged -= GameManager_OnGameStateChanged;
         ShelfCleaning.OnCleaningGameOpen -= ShelfCleaning_OnCleaningGameOpen;
         ShelfCleaning.OnCleaningGameCompleted -= ShelfCleaning_OnCleaningGameCompleted;
@@ -257,7 +279,7 @@ public class UserInterface : MonoBehaviour
     {
         startButton.GetComponent<AnimatedSlide>().SlideOut();
         editButton.GetComponent<AnimatedSlide>().SlideOut();
-        topBar.GetComponent<AnimatedSlide>().SlideOut();
+        topBar.GetComponent<AnimatedSlide>().SlideIn();
         bottomBar.GetComponent<AnimatedSlide>().SlideIn();
 
         EnableColliders(false);

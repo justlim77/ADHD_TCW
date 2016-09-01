@@ -14,6 +14,11 @@ using System;
 public class InputManager : Singleton<InputManager>
 {
     public KeyCode resetCurrencyKey = KeyCode.Delete;
+    public KeyCode reduceEnergyKey = KeyCode.PageDown;
+    public KeyCode addEnergyKey = KeyCode.PageUp;
+    public KeyCode reduceGemKey = KeyCode.DownArrow;
+    public KeyCode addGemKey = KeyCode.UpArrow;
+    public int gemInterval = 100;
 
     // Set to protected to prevent calling constructor
     protected InputManager() { }
@@ -33,6 +38,34 @@ public class InputManager : Singleton<InputManager>
         if (Input.GetKeyDown(resetCurrencyKey))
         {
             DataManager.ResetToDefault();
+        }
+
+        if (Input.GetKeyDown(reduceEnergyKey))
+        {
+            int energy = DataManager.ReadIntData(DataManager.totalEnergy);
+            energy--;
+            DataManager.StoreIntData(DataManager.totalEnergy, energy);
+        }
+
+        if (Input.GetKeyDown(addEnergyKey))
+        {
+            int energy = DataManager.ReadIntData(DataManager.totalEnergy);
+            energy++;
+            DataManager.StoreIntData(DataManager.totalEnergy, energy);
+        }
+
+        if (Input.GetKeyDown(reduceGemKey))
+        {
+            int gem = DataManager.ReadIntData(DataManager.totalGem);
+            gem -= gemInterval;
+            DataManager.StoreIntData(DataManager.totalGem, gem);
+        }
+
+        if (Input.GetKeyDown(addGemKey))
+        {
+            int gem = DataManager.ReadIntData(DataManager.totalGem);
+            gem += gemInterval;
+            DataManager.StoreIntData(DataManager.totalGem, gem);
         }
     }
 

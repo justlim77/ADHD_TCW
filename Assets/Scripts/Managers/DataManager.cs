@@ -4,9 +4,11 @@ using System;
 
 public class DataManager : MonoBehaviour
 {
+    public static event Action<int> OnEnergyValueChanged;
     public static event Action<int> OnGemValueChanged;
 
-    public static string totalGem = "GEM";
+    public const string totalGem = "GEM";
+    public const string totalEnergy = "LIFE";
     public static string acOne = "AC_2";
     public static string acTwo = "AC_2";
     public static string acThree = "AC_3";
@@ -16,9 +18,7 @@ public class DataManager : MonoBehaviour
     {
         if (PlayerPrefs.GetInt("FIRSTLAUNCH") == 0)
         {
-            PlayerPrefs.SetInt("GEM", 500);
-            PlayerPrefs.SetInt("LIFE", 3);
-            PlayerPrefs.SetInt("FIRSTLAUNCH", 1);
+            ResetToDefault();
         }
 
         return PlayerPrefs.GetInt(data);
@@ -28,13 +28,31 @@ public class DataManager : MonoBehaviour
     public static void StoreIntData(string data, int value)
     {
         PlayerPrefs.SetInt(data, value);
+
+        if (data == totalEnergy)
+        {
+            if (OnEnergyValueChanged != null)
+                OnEnergyValueChanged(ReadIntData(totalEnergy));
+        }
+
+        else if (data == totalGem)
+        {
+            if (OnGemValueChanged != null)
+                OnGemValueChanged(ReadIntData(totalGem));
+        }
     }
 
     public static void ResetToDefault()
     {
-        PlayerPrefs.SetInt("GEM", 500);
-        PlayerPrefs.SetInt("LIFE", 3);
-        PlayerPrefs.SetInt("FIRSTLAUNCH", 1);
+        StoreIntData(totalEnergy, 3);
+        StoreIntData(totalGem, 500);
+        StoreIntData("FIRSTLAUNCH", 1);
+    }
+
+    protected virtual void EnergyValueChanged()
+    {
+        if (OnEnergyValueChanged != null)
+            OnEnergyValueChanged(ReadIntData(totalEnergy));
     }
 
     protected virtual void GemValueChanged()
